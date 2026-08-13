@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { GridComponent, ColumnsDirective, ColumnDirective, Inject, Page, Resize } from '@syncfusion/ej2-react-grids';
 import { changeOrdersApi, reportsApi } from '../api/reports';
 import { Modal } from '../components/Modal';
+import { Icon } from '../components/Icon';
 import type { ChangeOrderSummaryDto, ChangeOrderStatus, CostKpisDto, CostPerformancePointDto, CostVarianceByCostCodeDto } from '../types';
 import { useSearchParams } from 'react-router-dom';
 import { downloadCsv } from '../utils/csv';
@@ -234,7 +235,7 @@ export function CostControlPage(): ReactElement {
               <div className="kpi-label">Total Portfolio Budget</div>
               <div className="kpi-value">{formatCompactCurrency(kpis.totalPortfolioBudget)}</div>
               <div className="kpi-change text-secondary">
-                <i className="icon icon-wallet" aria-hidden="true" />
+                <Icon className="icon" name="wallet" size={18} />
                 24 projects
               </div>
             </div>
@@ -242,7 +243,7 @@ export function CostControlPage(): ReactElement {
               <div className="kpi-label">Committed Spend</div>
               <div className="kpi-value">{formatCompactCurrency(kpis.committedSpend)}</div>
               <div className="kpi-change text-secondary">
-                <i className="icon icon-receipt" aria-hidden="true" />
+                <Icon className="icon" name="receipt" size={18} />
                 {pctOfBudget(kpis.committedSpend, kpis.totalPortfolioBudget)}
               </div>
             </div>
@@ -250,7 +251,7 @@ export function CostControlPage(): ReactElement {
               <div className="kpi-label">Forecast at Completion</div>
               <div className="kpi-value">{formatCompactCurrency(kpis.forecastAtCompletion)}</div>
               <div className={`kpi-change ${(budgetDelta ?? 0) >= 0 ? 'positive' : 'negative'}`}>
-                <i className={`icon icon-${(budgetDelta ?? 0) >= 0 ? 'arrow-up-right' : 'arrow-down-right'}`} aria-hidden="true" />
+                <Icon className="icon" name={(budgetDelta ?? 0) >= 0 ? 'arrow-up-right' : 'arrow-down-right'} size={14} />
                 {formatCompactCurrency(Math.abs(budgetDelta ?? 0))} {(budgetDelta ?? 0) >= 0 ? 'under budget' : 'over budget'}
               </div>
             </div>
@@ -258,7 +259,7 @@ export function CostControlPage(): ReactElement {
               <div className="kpi-label">Pending Change Orders</div>
               <div className="kpi-value">{formatCompactCurrency(kpis.pendingChangeOrdersAmount)}</div>
               <div className="kpi-change negative">
-                <i className="icon icon-file-warning" aria-hidden="true" />
+                <Icon className="icon" name="file-warning" size={18} />
                 {kpis.pendingChangeOrdersCount} pending
               </div>
             </div>
@@ -319,14 +320,14 @@ export function CostControlPage(): ReactElement {
                 <p className="card-subtitle">Awaiting owner approval</p>
               </div>
               <button type="button" className="btn btn-primary" onClick={openNewChangeOrderModal}>
-                <i className="icon icon-plus" aria-hidden="true" />
+                <Icon className="icon" name="plus" size={14} />
                 New Change Order
               </button>
             </div>
             <div className="toolbar co-toolbar">
               <div className="toolbar-left">
                 <div className="input-with-icon">
-                  <i className="icon icon-search" aria-hidden="true" />
+                  <Icon className="icon" name="search" size={16} />
                   <input
                     type="search"
                     className="input"
@@ -350,7 +351,7 @@ export function CostControlPage(): ReactElement {
               </div>
               <div className="toolbar-right">
                 <button type="button" className="btn btn-secondary btn-sm" onClick={handleExportChangeOrders} disabled={filteredChangeOrders.length === 0}>
-                  <i className="icon icon-download" aria-hidden="true" />
+                  <Icon className="icon" name="download" size={14} />
                   Export
                 </button>
               </div>

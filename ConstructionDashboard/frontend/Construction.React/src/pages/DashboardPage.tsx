@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GridComponent, ColumnsDirective, ColumnDirective, Inject, Resize } from '@syncfusion/ej2-react-grids';
+import { Icon } from '../components/Icon';
 import {
   AccumulationChartComponent,
   AccumulationSeriesCollectionDirective,
@@ -264,7 +265,7 @@ export function DashboardPage(): ReactElement {
                 <div className="kpi-label">{kpi.label}</div>
                 <div className="kpi-value">{kpi.value}</div>
                 <div className={`kpi-change ${kpi.tone}`}>
-                  <i className={`icon icon-${kpi.icon}`} aria-hidden="true" />
+                  <Icon className="icon" name={kpi.icon} size={14} />
                   {kpi.trend}
                 </div>
               </div>
@@ -291,7 +292,7 @@ export function DashboardPage(): ReactElement {
               >
                 {costTrendData.length === 0 ? (
                   <div className="empty-state" style={{ width: '100%' }}>
-                    <i className="icon icon-bar-chart-3" aria-hidden="true" />
+                    <Icon className="icon" name="bar-chart-3" size={48} />
                     <p>No trend data available</p>
                   </div>
                 ) : (

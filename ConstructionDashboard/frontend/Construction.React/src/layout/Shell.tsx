@@ -2,6 +2,7 @@ import { type ReactNode, useState, useCallback, useEffect, useMemo } from 'react
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import type { NavigationItem } from './navigation';
 import { primaryNav } from './navigation';
+import { Icon } from '../components/Icon';
 import './Shell.css';
 
 interface PageMeta {
@@ -30,8 +31,7 @@ const navItemClassName = ({ isActive }: { isActive: boolean }): string =>
   `nav-item${isActive ? ' is-active' : ''}`;
 
 function NavIcon({ name }: { name: string }) {
-  // Lucide Static font icons via class name
-  return <i className={`icon icon-${name}`} aria-hidden="true" />;
+  return <Icon className="icon" name={name} size={18} />;
 }
 
 function SidebarNav({ items, onNavigate }: { items: NavigationItem[]; onNavigate?: () => void }) {
@@ -101,7 +101,7 @@ export function Shell(): ReactNode {
     <div className="app-shell" data-theme={theme}>
       <aside className={`sidebar${menuOpen ? ' is-open' : ''}`}>
         <div className="sidebar-brand">
-          <i className="icon icon-building-2" aria-hidden="true" />
+          <Icon className="icon" name="building-2" size={24} />
           <span>Construction</span>
         </div>
         <nav aria-label="Primary">

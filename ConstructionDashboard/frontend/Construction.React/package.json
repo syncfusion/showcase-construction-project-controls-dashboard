@@ -24,6 +24,7 @@
     "@syncfusion/ej2-react-pdfviewer": "^34.1.29",
     "@syncfusion/ej2-react-popups": "^34.1.29",
     "@syncfusion/ej2-react-splitbuttons": "^34.1.29",
+    "lucide-react": "^1.31.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1"

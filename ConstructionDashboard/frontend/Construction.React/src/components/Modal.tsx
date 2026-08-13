@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Icon } from './Icon';
 import './Modal.css';
 
 export interface ModalProps {
@@ -56,7 +57,7 @@ export function Modal({ open, title, subtitle, onClose, children, footer, size =
             {subtitle && <p className="modal-subtitle">{subtitle}</p>}
           </div>
           <button type="button" className="btn btn-ghost btn-icon btn-sm" onClick={onClose} aria-label="Close">
-            <i className="icon icon-x" aria-hidden="true" />
+            <Icon className="icon" name="x" size={18} />
           </button>
         </div>
         <div className="modal-body">{children}</div>

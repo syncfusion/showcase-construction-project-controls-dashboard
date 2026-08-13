@@ -18,7 +18,9 @@ import {
 import { format } from '../utils/date';
 import { formatCurrency } from '../utils/format';
 import { projectsApi } from '../api/reports';
+import { getPublicAssetUrl } from '../basePath';
 import { Modal } from '../components/Modal';
+import { Icon } from '../components/Icon';
 import type {
   ProjectDetailDto,
   ProjectKpisDto,
@@ -184,7 +186,7 @@ export function ProjectDetailPage(): ReactElement {
           onClick={() => navigate('/projects')}
           aria-label="Back to projects"
         >
-          <i className="icon icon-arrow-left" aria-hidden="true" />
+          <Icon className="icon" name="arrow-left" size={16} />
         </button>
         <span>Projects</span>
         <span aria-hidden="true">/</span>
@@ -275,7 +277,7 @@ function OverviewTab({ project, kpis, milestones, risks, documents }: OverviewTa
             {formatCurrency(Math.abs(kpis.costVariance))}
           </div>
           <div className={`kpi-change ${kpis.costVariance >= 0 ? 'positive' : 'negative'}`}>
-            <i className={`icon icon-${kpis.costVariance >= 0 ? 'arrow-up-right' : 'arrow-down-right'}`} aria-hidden="true" />
+            <Icon className="icon" name={kpis.costVariance >= 0 ? 'arrow-up-right' : 'arrow-down-right'} size={14} />
             {kpis.costVariance >= 0 ? 'Under budget' : 'Over budget'}
           </div>
         </div>
@@ -285,7 +287,7 @@ function OverviewTab({ project, kpis, milestones, risks, documents }: OverviewTa
             {formatPercent(kpis.scheduleVariance)}
           </div>
           <div className={`kpi-change ${kpis.scheduleVariance >= 0 ? 'positive' : 'negative'}`}>
-            <i className={`icon icon-${kpis.scheduleVariance >= 0 ? 'arrow-up-right' : 'arrow-down-right'}`} aria-hidden="true" />
+            <Icon className="icon" name={kpis.scheduleVariance >= 0 ? 'arrow-up-right' : 'arrow-down-right'} size={14} />
             {kpis.scheduleVariance >= 0 ? 'Ahead of schedule' : 'Behind schedule'}
           </div>
         </div>
@@ -293,7 +295,7 @@ function OverviewTab({ project, kpis, milestones, risks, documents }: OverviewTa
           <div className="kpi-label">Open RFIs</div>
           <div className="kpi-value">{kpis.openRfis}</div>
           <div className={`kpi-change ${kpis.overdueRfis > 0 ? 'warning' : 'positive'}`}>
-            <i className={`icon icon-${kpis.overdueRfis > 0 ? 'clock' : 'check-circle'}`} aria-hidden="true" />
+            <Icon className="icon" name={kpis.overdueRfis > 0 ? 'clock' : 'check-circle'} size={14} />
             {kpis.overdueRfis > 0 ? `${kpis.overdueRfis} overdue` : 'No overdue'}
           </div>
         </div>
@@ -301,7 +303,7 @@ function OverviewTab({ project, kpis, milestones, risks, documents }: OverviewTa
           <div className="kpi-label">Open Submittals</div>
           <div className="kpi-value">{kpis.openSubmittals}</div>
           <div className={`kpi-change ${kpis.overdueSubmittals > 0 ? 'warning' : 'positive'}`}>
-            <i className={`icon icon-${kpis.overdueSubmittals > 0 ? 'clock' : 'check-circle'}`} aria-hidden="true" />
+            <Icon className="icon" name={kpis.overdueSubmittals > 0 ? 'clock' : 'check-circle'} size={14} />
             {kpis.overdueSubmittals > 0 ? `${kpis.overdueSubmittals} overdue` : 'On track'}
           </div>
         </div>
@@ -309,7 +311,7 @@ function OverviewTab({ project, kpis, milestones, risks, documents }: OverviewTa
           <div className="kpi-label">Pending Change Orders</div>
           <div className="kpi-value">{formatCurrency(kpis.pendingChangeOrdersAmount)}</div>
           <div className={`kpi-change ${kpis.pendingChangeOrdersAmount > 0 ? 'warning' : 'positive'}`}>
-            <i className={`icon icon-${kpis.pendingChangeOrdersAmount > 0 ? 'file-plus' : 'check-circle'}`} aria-hidden="true" />
+            <Icon className="icon" name={kpis.pendingChangeOrdersAmount > 0 ? 'file-plus' : 'check-circle'} size={14} />
             {kpis.pendingChangeOrdersAmount > 0 ? `${kpis.openChangeOrders} pending review` : 'No pending COs'}
           </div>
         </div>
@@ -372,7 +374,7 @@ function OverviewTab({ project, kpis, milestones, risks, documents }: OverviewTa
             )}
             {risks.map((r) => (
               <div key={r.id} className={`alert ${riskAlertClass[r.severity] ?? 'alert-info'}`}>
-                <i className={`icon icon-${r.severity === 'Critical' ? 'shield-alert' : 'alert-triangle'}`} aria-hidden="true" />
+                <Icon className="icon" name={r.severity === 'Critical' ? 'shield-alert' : 'alert-triangle'} size={16} />
                 <div>
                   <div style={{ fontWeight: 600 }}>{r.title}</div>
                   <div style={{ fontSize: 'var(--text-caption-size)', opacity: 0.9 }}>
@@ -504,7 +506,7 @@ function OverviewTab({ project, kpis, milestones, risks, documents }: OverviewTa
               <PdfViewerComponent
                 id="project-document-pdf-viewer"
                 documentPath={SAMPLE_PDF_URL}
-                resourceUrl="/ej2-pdfviewer-lib"
+                resourceUrl={getPublicAssetUrl('ej2-pdfviewer-lib')}
                 style={{ height: '620px' }}
               >
                 <PdfViewerInject

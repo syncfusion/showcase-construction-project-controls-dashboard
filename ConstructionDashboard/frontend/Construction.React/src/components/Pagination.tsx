@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { Icon } from './Icon';
 import './Pagination.css';
 
 export interface PaginationProps {
@@ -22,7 +23,7 @@ export function Pagination({ page, pageSize, totalCount, onPageChange }: Paginat
         onClick={() => onPageChange(page - 1)}
         aria-label="Previous page"
       >
-        <i className="icon icon-chevron-left" aria-hidden="true" />
+        <Icon className="icon" name="chevron-left" size={16} />
       </button>
       <span className="pagination-info">
         Page <strong>{page}</strong> of {totalPages}
@@ -34,7 +35,7 @@ export function Pagination({ page, pageSize, totalCount, onPageChange }: Paginat
         onClick={() => onPageChange(page + 1)}
         aria-label="Next page"
       >
-        <i className="icon icon-chevron-right" aria-hidden="true" />
+        <Icon className="icon" name="chevron-right" size={16} />
       </button>
     </div>
   );

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GridComponent, ColumnsDirective, ColumnDirective, Inject, Page, Sort, Resize } from '@syncfusion/ej2-react-grids';
 import { risksApi, riskMatrixApi } from '../api/reports';
 import { Modal } from '../components/Modal';
+import { Icon } from '../components/Icon';
 import { RiskMatrixHeatmap } from '../components/RiskMatrixHeatmap';
 import type { RiskKpisDto, RiskMatrixCellViewModel, RiskProbability, RiskSeverity, RiskStatus, RiskSummaryDto } from '../types';
 import { onActivateKey } from '../utils/a11y';
@@ -294,7 +295,7 @@ export function RisksPage(): ReactElement {
           <div className="toolbar">
             <div className="toolbar-left">
               <div className="input-with-icon">
-                <i className="icon icon-search" aria-hidden="true" />
+                <Icon className="icon" name="search" size={16} />
                 <input
                   type="search"
                   className="input"
@@ -326,11 +327,11 @@ export function RisksPage(): ReactElement {
             </div>
             <div className="toolbar-right">
               <button type="button" className="btn btn-secondary btn-sm" onClick={handleExportRisks} disabled={filteredRisks.length === 0}>
-                <i className="icon icon-download" aria-hidden="true" />
+                <Icon className="icon" name="download" size={14} />
                 Export
               </button>
               <button type="button" className="btn btn-primary" onClick={openNewRiskModal}>
-                <i className="icon icon-plus" aria-hidden="true" />
+                <Icon className="icon" name="plus" size={14} />
                 New Risk
               </button>
             </div>
@@ -346,7 +347,7 @@ export function RisksPage(): ReactElement {
                 <div className="kpi-label">{kpi.label}</div>
                 <div className={`kpi-value ${kpi.key === 'critical' ? 'text-error' : kpi.key === 'mitigated' ? 'positive' : ''}`}>{kpi.value}</div>
                 <div className={`kpi-change ${kpiChangeTone[kpi.key]}`}>
-                  <i className={`icon icon-${kpiIcon[kpi.key]}`} aria-hidden="true" />
+                  <Icon className="icon" name={kpiIcon[kpi.key]} size={14} />
                   {kpiChangeLabel[kpi.key]}
                 </div>
               </div>
@@ -448,7 +449,7 @@ export function RisksPage(): ReactElement {
                   navigate(`/projects/${projectId}`);
                 }}
               >
-                <i className="icon icon-external-link" aria-hidden="true" />
+                <Icon className="icon" name="external-link" size={14} />
                 View Project Details
               </button>
             </>

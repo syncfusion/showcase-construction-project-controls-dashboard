@@ -976,9 +976,16 @@ img {
 .empty-state .icon {
   width: 48px;
   height: 48px;
-  font-size: 48px;
   margin-bottom: var(--space-md);
   opacity: .5;
+}
+
+/* SVG icons (Lucide) — sensible defaults; per-instance size still set inline. */
+.icon {
+  display: inline-flex;
+  vertical-align: middle;
+  flex-shrink: 0;
+  stroke: currentColor;
 }
 
 /* Tooltip — sm size per Design System/components/layout/tooltip spec.

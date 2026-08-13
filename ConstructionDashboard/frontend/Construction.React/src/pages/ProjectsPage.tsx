@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { GridComponent, ColumnsDirective, ColumnDirective, Inject, Page, Resize } from '@syncfusion/ej2-react-grids';
 import { projectsApi } from '../api/reports';
 import { Modal } from '../components/Modal';
+import { Icon } from '../components/Icon';
 import type { ProjectSummaryDto, ProjectStatus } from '../types';
 import { downloadCsv } from '../utils/csv';
 import { format as formatDate } from '../utils/date';
@@ -181,7 +182,7 @@ export function ProjectsPage(): ReactElement {
       <div className="toolbar">
         <div className="toolbar-left">
           <div className="input-with-icon">
-            <i className="icon icon-search" aria-hidden="true" />
+            <Icon className="icon" name="search" size={16} />
             <input
               type="search"
               className="input"
@@ -205,11 +206,11 @@ export function ProjectsPage(): ReactElement {
         </div>
         <div className="toolbar-right">
           <button type="button" className="btn btn-secondary btn-sm" onClick={handleExportProjects} disabled={filteredProjects.length === 0}>
-            <i className="icon icon-download" aria-hidden="true" />
+            <Icon className="icon" name="download" size={14} />
             Export
           </button>
           <button type="button" className="btn btn-primary" onClick={openNewProjectModal}>
-            <i className="icon icon-plus" aria-hidden="true" />
+            <Icon className="icon" name="plus" size={14} />
             New Project
           </button>
         </div>
@@ -288,7 +289,7 @@ export function ProjectsPage(): ReactElement {
               width="48"
               template={() => (
                 <button type="button" className="btn btn-ghost btn-icon btn-sm" tabIndex={-1} aria-hidden="true">
-                  <i className="icon icon-chevron-right" aria-hidden="true" />
+                  <Icon className="icon" name="chevron-right" size={14} />
                 </button>
               )}
             />
