@@ -15,6 +15,12 @@ React/dist-ssr/
 React/.vite/
 React/coverage/
 
+# Blazor build output and publish folder
+Blazor/bin/
+Blazor/obj/
+Blazor/publish/
+Blazor/wwwroot/_framework/
+
 # Logs
 logs/
 *.log

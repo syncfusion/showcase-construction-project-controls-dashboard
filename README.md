@@ -1,6 +1,6 @@
 # Construction Project Controls Dashboard
 
-Construction Project Controls Dashboard is a cross-framework enterprise showcase application built with a shared ASP.NET Core Web API and two Syncfusion-powered clients: Angular and React.
+Construction Project Controls Dashboard is a cross-framework enterprise showcase application built with a shared ASP.NET Core Web API and three Syncfusion-powered clients: Angular, React, and Blazor.
 
 The application delivers a centralized command center for construction project controls — integrating project management, scheduling, cost control, and field reporting data into one real-time view. Project managers, planners, and stakeholders can track progress, monitor budgets, assess risks, and identify deviations from planned baselines across a portfolio of projects. It also shows how the same enterprise experience can be delivered consistently across different frontend stacks by using Syncfusion UI components.
 
@@ -30,6 +30,7 @@ The application delivers a centralized command center for construction project c
 | Data | Entity Framework Core and PostgreSQL |
 | Angular client | Angular 22, TypeScript, RxJS, Syncfusion Angular UI, Lucide icons |
 | React client | React 19, TypeScript, Vite, Syncfusion React UI, Lucide icons |
+| Blazor client | Blazor (Interactive Server) on .NET 10, Syncfusion Blazor UI |
 | Testing | .NET xUnit test project |
 
 The UI implementations use Syncfusion components such as DataGrid, Charts, Gantt/Scheduler, Maps, Diagrams, HeatMap, and PDF Viewer.
@@ -39,7 +40,7 @@ The UI implementations use Syncfusion components such as DataGrid, Charts, Gantt
 This repository is a practical proof of how the [Syncfusion component ecosystem](https://www.syncfusion.com/) can accelerate component-rich enterprise development.
 
 - Production-oriented UI components reduce the amount of custom code required for advanced grids, charts, scheduling, Gantt views, maps, and document viewing.
-- Similar component concepts across Angular and React make it easier to preserve business behavior while choosing the framework that best fits each team.
+- Similar component concepts across Angular, React, and Blazor make it easier to preserve business behavior while choosing the framework that best fits each team.
 - Built-in capabilities such as filtering, grouping, export, responsive rendering, accessibility, and theming help teams focus on business workflows rather than foundational UI infrastructure.
 
 ## Repository structure
@@ -53,10 +54,11 @@ showcase-git/
 │   ├── Construction.Infrastructure/        # EF Core DbContext, migrations, repositories, services, seed data
 │   └── Construction.Tests/                   # xUnit test project
 ├── Angular/                                 # Angular client
-└── React/                                   # React client (Vite)
+├── React/                                   # React client (Vite)
+└── Blazor/                                  # Blazor Interactive Server client (.NET 10)
 ```
 
-Each frontend is a standalone application with its own `README.md`, `package.json`, and build configuration.
+Each frontend is a standalone application with its own `README.md`, `package.json` (or `.csproj`), and build configuration.
 
 ## Run locally
 
@@ -125,6 +127,15 @@ npm run dev
 
 Open `http://localhost:5173`.
 
+Blazor (Interactive Server, .NET 10; reads `ApiBaseUrl` from `appsettings.json`):
+
+```bash
+cd Blazor
+dotnet run
+```
+
+Open `http://localhost:5023`.
+
 ## Build and test
 
 ```bash
@@ -140,6 +151,10 @@ npm run build
 # React
 cd ../React
 npm run build
+
+# Blazor
+cd ../Blazor
+dotnet build
 ```
 
 ## Licensing

@@ -1,0 +1,35 @@
+@if (Open)
+{
+    <div class="modal-overlay" @onmousedown="() => OnClosed.InvokeAsync()" @onkeydown="HandleKeyDown">
+        <div
+            class="modal-panel modal-@Size"
+            role="dialog"
+            aria-modal="true"
+            aria-label="@Title"
+            tabindex="-1"
+            @ref="_panelRef"
+            @onmousedown:stopPropagation="true">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">@Title</h2>
+                    @if (!string.IsNullOrEmpty(Subtitle))
+                    {
+                        <p class="modal-subtitle">@Subtitle</p>
+                    }
+                </div>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" @onclick="() => OnClosed.InvokeAsync()" aria-label="Close">
+                    <i class="icon icon-x" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            @if (FooterContent is not null)
+            {
+                <div class="modal-footer">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    </div>
+}

@@ -1,0 +1,281 @@
+@page "/cost-control"
+@layout MainLayout
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.HeatMap
+
+<PageTitle>Cost Control</PageTitle>
+
+<div class="cost-control-page">
+    <header class="page-header">
+        <h1>Cost Control</h1>
+        <p>Track budgets, committed spend, forecasts, and change orders.</p>
+    </header>
+
+    @if (_loading)
+    {
+        <div class="loading-state" aria-live="polite">Loading cost control…</div>
+    }
+    @if (_error is not null)
+    {
+        <div class="alert alert-error" role="alert">@_error</div>
+    }
+
+    @if (!_loading && _error is null && _kpis is not null)
+    {
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Portfolio Budget</div>
+                <div class="kpi-value">@Formatters.FormatCompactCurrency(_kpis.TotalPortfolioBudget)</div>
+                <div class="kpi-change text-secondary"><i class="icon icon-wallet" aria-hidden="true"></i>24 projects</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Committed Spend</div>
+                <div class="kpi-value">@Formatters.FormatCompactCurrency(_kpis.CommittedSpend)</div>
+                <div class="kpi-change text-secondary"><i class="icon icon-receipt" aria-hidden="true"></i>@PctOfBudget(_kpis.CommittedSpend, _kpis.TotalPortfolioBudget)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Forecast at Completion</div>
+                <div class="kpi-value">@Formatters.FormatCompactCurrency(_kpis.ForecastAtCompletion)</div>
+                <div class="kpi-change @((BudgetDelta ?? 0) >= 0 ? "positive" : "negative")">
+                    <i class="icon icon-@((BudgetDelta ?? 0) >= 0 ? "arrow-up-right" : "arrow-down-right")" aria-hidden="true"></i>
+                    @Formatters.FormatCompactCurrency(Math.Abs(BudgetDelta ?? 0)) @((BudgetDelta ?? 0) >= 0 ? "under budget" : "over budget")
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Pending Change Orders</div>
+                <div class="kpi-value">@Formatters.FormatCompactCurrency(_kpis.PendingChangeOrdersAmount)</div>
+                <div class="kpi-change negative"><i class="icon icon-file-warning" aria-hidden="true"></i>@_kpis.PendingChangeOrdersCount pending</div>
+            </div>
+        </div>
+
+        <div class="two-column-grid">
+            <div class="card">
+                <div class="card-header"><div><h2 class="card-title">Earned Value Summary</h2><p class="card-subtitle">Year to date</p></div></div>
+                <div class="dashboard-chart" role="img" aria-label="Earned value: planned versus actual cost by month">
+                    @if (TrendSeriesData.Count == 0)
+                    {
+                        <div class="empty-state"><i class="icon icon-bar-chart-3" aria-hidden="true" style="font-size: 48px"></i><p>No trend data available</p></div>
+                    }
+                    @if (_paletteReady)
+                    {
+                        <SfChart @ref="_chart"
+                                 Width="100%" Height="208px"
+                                 Background="transparent"
+                                 Theme="@Syncfusion.Blazor.Theme.Material"
+                                 Palettes="@(new[] { Palette.Planned, Palette.Actual })">
+                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                <ChartXAxisLabelStyle Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" Size="@Palette.CaptionSize" FontWeight="500" />
+                                <ChartXAxisLineStyle Color="@Palette.AxisLine" Width="1" />
+                                <ChartXAxisMajorGridLines Width="0" />
+                                <ChartXAxisMajorTickLines Width="0" />
+                            </ChartPrimaryXAxis>
+                            <ChartPrimaryYAxis Visible="false">
+                                <ChartYAxisMajorGridLines Width="0" />
+                                <ChartYAxisLineStyle Width="0" />
+                                <ChartYAxisMajorTickLines Width="0" />
+                            </ChartPrimaryYAxis>
+                            <ChartTooltipSettings Enable="true" Shared="true"
+                                                  Fill="@Palette.TooltipBg"
+                                                  Opacity="1"
+                                                  Border="new Syncfusion.Blazor.Charts.ChartTooltipBorder { Width = 0 }">
+                                <ChartTooltipTextStyle Color="@Palette.TooltipText" FontFamily="@Palette.FontFamily" Size="12px" />
+                            </ChartTooltipSettings>
+                            <ChartLegendSettings Visible="false" />
+                            <ChartArea><ChartAreaBorder Width="0" Color="transparent" /></ChartArea>
+                            <ChartMargin Top="6" Right="4" Bottom="2" Left="4" />
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@TrendSeriesData" XName="X" YName="Planned" Name="BCWS (Planned)" Type="ChartSeriesType.Column"
+                                             ColumnWidth="0.4" ColumnSpacing="0.06"
+                                             CornerRadius="new Syncfusion.Blazor.Charts.ChartCornerRadius { TopLeft = 2, TopRight = 2 }" />
+                                <ChartSeries DataSource="@TrendSeriesData" XName="X" YName="Actual" Name="ACWP (Actual)" Type="ChartSeriesType.Column"
+                                             ColumnWidth="0.4" ColumnSpacing="0.06"
+                                             CornerRadius="new Syncfusion.Blazor.Charts.ChartCornerRadius { TopLeft = 2, TopRight = 2 }" />
+                            </ChartSeriesCollection>
+                        </SfChart>
+                    }
+                </div>
+                <div class="earned-value-legend">
+                    <span><span class="legend-swatch" style="background: @Palette.Planned"></span>BCWS</span>
+                    <span><span class="legend-swatch" style="background: @Palette.Actual"></span>ACWP</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div><h2 class="card-title">Cost Variance Heatmap</h2><p class="card-subtitle">By cost code</p></div></div>
+                <div class="cost-heatmap-wrap">
+                    @if (_paletteReady && _variances.Count > 0)
+                    {
+                        <SfHeatMap @ref="_heatmap"
+                                   TValue="object"
+                                   DataSource="@HeatmapData"
+                                   Height="180px"
+                                   Width="100%"
+                                   Theme="@Syncfusion.Blazor.Theme.Material"
+                                   ShowTooltip="false">
+                            <HeatMapXAxis Labels="@HeatmapXAxisLabels" ValueType="Syncfusion.Blazor.HeatMap.ValueType.Category"
+                                          OpposedPosition="true">
+                                <HeatMapXAxisTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
+                            </HeatMapXAxis>
+                            <HeatMapYAxis Labels="@(new[] { "Variance" })" OpposedPosition="false">
+                                <HeatMapYAxisTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
+                            </HeatMapYAxis>
+                            <HeatMapPaletteSettings Type="PaletteType.Fixed">
+                                <HeatMapPalettes>
+                                    <HeatMapPalette Color="@Palette.PositiveBg" />
+                                    <HeatMapPalette Color="@Palette.WarningBg" />
+                                    <HeatMapPalette Color="@Palette.NegativeBg" />
+                                </HeatMapPalettes>
+                            </HeatMapPaletteSettings>
+                            <HeatMapCellSettings ShowLabel="true">
+                                <HeatMapCellTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
+                                <HeatMapCellBorder Width="4" Color="@Palette.CardBackground" Radius="6" />
+                            </HeatMapCellSettings>
+                            <HeatMapLegendSettings Visible="false" />
+                            <HeatMapMargin Left="0" Right="0" Top="0" Bottom="0" />
+                            <HeatMapEvents TValue="object" CellRendering="OnHeatmapCellRender" />
+                        </SfHeatMap>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card change-order-card grid-card">
+            <div class="card-header">
+                <div><h2 class="card-title">Pending Change Orders</h2><p class="card-subtitle">Awaiting owner approval</p></div>
+                <button type="button" class="btn btn-primary" @onclick="OpenNewChangeOrderModal">
+                    <i class="icon icon-plus" aria-hidden="true"></i>New Change Order
+                </button>
+            </div>
+            <div class="toolbar co-toolbar">
+                <div class="toolbar-left">
+                    <div class="input-with-icon">
+                        <i class="icon icon-search" aria-hidden="true"></i>
+                        <input type="search" class="input" placeholder="Search CO #, description, project…" value="@_coSearch" @oninput="OnSearchChanged" style="min-width: 240px" />
+                    </div>
+                    <select class="select" @onchange="OnStatusChanged" style="min-width: 160px">
+                        @foreach (var (status, label) in StatusOptions)
+                        {
+                            <option value="@(status?.ToString() ?? "")" selected="@(_coStatus == status)">@label</option>
+                        }
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button type="button" class="btn btn-secondary btn-sm" @onclick="ExportChangeOrders" disabled="@(FilteredChangeOrders.Count == 0)">
+                        <i class="icon icon-download" aria-hidden="true"></i>Export
+                    </button>
+                </div>
+            </div>
+            @if (_coLoading)
+            {
+                <div class="loading-state" aria-live="polite">Loading change orders…</div>
+            }
+            @if (!_coLoading)
+            {
+                <SfGrid @ref="_coGrid"
+                        TValue="ChangeOrderSummaryDto"
+                        DataSource="@FilteredChangeOrders"
+                        AllowPaging="true"
+                        AllowResizing="true"
+                        Width="100%"
+                        GridLines="GridLine.Horizontal">
+                    <GridPageSettings PageSize="20" PageCount="4" />
+                    <GridEvents TValue="ChangeOrderSummaryDto" RowSelected="OnCoRowSelected" />
+                    <GridColumns>
+                        <GridColumn Field="@nameof(ChangeOrderSummaryDto.Number)" HeaderText="CO #" Width="90">
+                            <Template>
+                                @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                <span class="font-mono">@co.Number</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(ChangeOrderSummaryDto.ProjectId)" HeaderText="Project ID" Width="110">
+                            <Template>
+                                @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                <span>@co.ProjectId</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(ChangeOrderSummaryDto.Description)" HeaderText="Description">
+                            <Template>
+                                @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                <span class="truncate" style="display: block; max-width: 100%; white-space: normal; word-break: break-word">@co.Description</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(ChangeOrderSummaryDto.RequestDate)" HeaderText="Submitted" Width="120">
+                            <Template>
+                                @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                <span>@(co.RequestDate is not null ? Formatters.FormatDate(co.RequestDate) : "—")</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(ChangeOrderSummaryDto.Amount)" HeaderText="Amount" Width="130">
+                            <Template>
+                                @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                <span style="font-weight: 600">@(co.Amount >= 0 ? "+" : "")@Formatters.FormatCurrency(co.Amount)</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(ChangeOrderSummaryDto.Status)" HeaderText="Status" Width="130">
+                            <Template>
+                                @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                <span class="badge @StatusBadgeClass[co.Status]">@co.Status</span>
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            }
+        </div>
+    }
+
+    <Modal Open="_selectedCo is not null" Title="@(_selectedCo is not null ? $"Change Order {_selectedCo.Number}" : "")"
+           Subtitle="@(_selectedCo is not null ? $"Project {_selectedCo.ProjectId}" : null)" Size="lg" OnClosed="() => _selectedCo = null">
+        <ChildContent>
+            @if (_selectedCo is not null)
+            {
+                <div class="modal-detail-grid">
+                    <div class="modal-detail-item"><span class="modal-detail-label">Status</span><span class="badge @StatusBadgeClass[_selectedCo.Status]" style="width: fit-content">@_selectedCo.Status</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Amount</span><span class="modal-detail-value">@(_selectedCo.Amount >= 0 ? "+" : "")@Formatters.FormatCurrency(_selectedCo.Amount)</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Requested By</span><span class="modal-detail-value">@(_selectedCo.RequestedBy ?? "—")</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Request Date</span><span class="modal-detail-value">@(_selectedCo.RequestDate is not null ? Formatters.FormatDate(_selectedCo.RequestDate) : "—")</span></div>
+                    <div class="modal-detail-item is-span-2"><span class="modal-detail-label">Description</span><span class="modal-detail-value" style="font-weight: 400">@_selectedCo.Description</span></div>
+                </div>
+            }
+        </ChildContent>
+    </Modal>
+
+    <Modal Open="_showNewCoModal" Title="New Change Order" Subtitle="Demo template — saved to this view only; nothing is sent to the backend." Size="lg" OnClosed="() => _showNewCoModal = false">
+        <ChildContent>
+            <div class="modal-form-grid">
+                <div class="modal-form-field">
+                    <label for="co-project">Project ID</label>
+                    <input id="co-project" class="input" type="number" @bind="_draft.ProjectId" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="co-amount">Amount ($)</label>
+                    <input id="co-amount" class="input" type="number" @bind="_draft.Amount" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="co-requestedBy">Requested By</label>
+                    <input id="co-requestedBy" class="input" type="text" @bind="_draft.RequestedBy" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="co-requestDate">Request Date</label>
+                    <input id="co-requestDate" class="input" type="date" @bind="_draft.RequestDate" @bind:format="yyyy-MM-dd" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="co-impactDays">Schedule Impact (days)</label>
+                    <input id="co-impactDays" class="input" type="number" @bind="_draft.ImpactDays" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field is-span-2">
+                    <label for="co-description">Description</label>
+                    <textarea id="co-description" class="input" rows="2" @bind="_draft.Description" @bind:event="oninput" required></textarea>
+                </div>
+                <div class="modal-form-field is-span-2">
+                    <label for="co-justification">Justification</label>
+                    <textarea id="co-justification" class="input" rows="3" @bind="_draft.Justification" @bind:event="oninput"></textarea>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn btn-secondary" @onclick="() => _showNewCoModal = false">Cancel</button>
+            <button type="button" class="btn btn-primary" @onclick="SaveNewChangeOrder" disabled="@string.IsNullOrWhiteSpace(_draft.Description)">Save Change Order</button>
+        </FooterContent>
+    </Modal>
+</div>

@@ -1,0 +1,199 @@
+@page "/"
+@layout MainLayout
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Grids
+
+<PageTitle>Dashboard</PageTitle>
+
+<div class="dashboard-page">
+    <header class="page-header">
+        <h1>Dashboard</h1>
+        <p>Real-time project controls across the construction portfolio.</p>
+    </header>
+
+    @if (_loading)
+    {
+        <div class="loading-state" aria-live="polite">Loading dashboard…</div>
+    }
+    @if (_error is not null)
+    {
+        <div class="alert alert-error" role="alert">@_error</div>
+    }
+
+    @if (!_loading && _error is null && _portfolio is not null && _cost is not null && _health is not null)
+    {
+        <div class="kpi-grid">
+            @foreach (var kpi in KpiSummary!)
+            {
+                <div class="kpi-card @(kpi.To is not null ? "is-clickable" : "")"
+                     role="@(kpi.To is not null ? "button" : null)"
+                     tabindex="@(kpi.To is not null ? "0" : null)"
+                     aria-label="@(kpi.To is not null ? $"View {kpi.Label}" : null)"
+                     @onclick="() => { if (kpi.To is not null) GoTo(kpi.To); }"
+                     @onkeydown="(e) => OnKpiKeydown(e, kpi)">
+                    <div class="kpi-label">@kpi.Label</div>
+                    <div class="kpi-value">@kpi.Value</div>
+                    <div class="kpi-change @kpi.Tone">
+                        <i class="icon icon-@kpi.Icon" aria-hidden="true"></i>
+                        @kpi.Trend
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="two-column-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Cost Performance Trend</h2>
+                        <p class="card-subtitle">Earned value vs. actual spend</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" @onclick='() => GoTo("/reports")'>View report</button>
+                </div>
+                <div class="dashboard-chart" role="img" aria-label="Cost performance trend, planned versus actual by month">
+                    @if (TrendSeriesData.Count == 0)
+                    {
+                        <div class="empty-state"><i class="icon icon-bar-chart-3" aria-hidden="true" style="font-size: 48px"></i><p>No trend data available</p></div>
+                    }
+                    @if (_paletteReady)
+                    {
+                        <SfChart @ref="_chart"
+                                 Width="100%" Height="208px"
+                                 Background="transparent"
+                                 Theme="@Syncfusion.Blazor.Theme.Material"
+                                 Palettes="@(new[] { Palette.Planned, Palette.Actual })">
+                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                <ChartXAxisLabelStyle Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" Size="@Palette.CaptionSize" FontWeight="500" />
+                                <ChartXAxisLineStyle Color="@Palette.AxisLine" Width="1" />
+                                <ChartXAxisMajorGridLines Width="0" />
+                                <ChartXAxisMajorTickLines Width="0" />
+                            </ChartPrimaryXAxis>
+                            <ChartPrimaryYAxis Visible="false">
+                                <ChartYAxisMajorGridLines Width="0" />
+                                <ChartYAxisLineStyle Width="0" />
+                                <ChartYAxisMajorTickLines Width="0" />
+                            </ChartPrimaryYAxis>
+                            <ChartTooltipSettings Enable="true" Shared="true"
+                                                  Fill="@Palette.TooltipBg"
+                                                  Opacity="1"
+                                                  Border="new Syncfusion.Blazor.Charts.ChartTooltipBorder { Width = 0 }">
+                                <ChartTooltipTextStyle Color="@Palette.TooltipText" FontFamily="@Palette.FontFamily" Size="12px" />
+                            </ChartTooltipSettings>
+                            <ChartLegendSettings Visible="false" />
+                            <ChartArea><ChartAreaBorder Width="0" Color="transparent" /></ChartArea>
+                            <ChartMargin Top="6" Right="4" Bottom="2" Left="4" />
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@TrendSeriesData" XName="X" YName="Planned" Name="Planned" Type="ChartSeriesType.Column"
+                                             ColumnWidth="0.4" ColumnSpacing="0.06"
+                                             CornerRadius="new Syncfusion.Blazor.Charts.ChartCornerRadius { TopLeft = 2, TopRight = 2 }" />
+                                <ChartSeries DataSource="@TrendSeriesData" XName="X" YName="Actual" Name="Actual" Type="ChartSeriesType.Column"
+                                             ColumnWidth="0.4" ColumnSpacing="0.06"
+                                             CornerRadius="new Syncfusion.Blazor.Charts.ChartCornerRadius { TopLeft = 2, TopRight = 2 }" />
+                            </ChartSeriesCollection>
+                        </SfChart>
+                    }
+                </div>
+                <div class="chart-legend">
+                    <span><span class="legend-swatch" style="background: @Palette.Planned"></span>Planned</span>
+                    <span><span class="legend-swatch" style="background: @Palette.Actual"></span>Actual</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Projects by Health</h2>
+                        <p class="card-subtitle">Risk-weighted health distribution</p>
+                    </div>
+                </div>
+                <div class="health-chart" style="display: flex; align-items: center; gap: var(--space-xl)">
+                    <div class="donut" style="position: relative; width: 140px; height: 140px">
+                        @if (HealthDonutData.Count == 0)
+                        {
+                            <div class="empty-state"><p>No projects yet</p></div>
+                        }
+                        @if (_paletteReady)
+                        {
+                            <SfAccumulationChart @ref="_donut"
+                                                 Width="140px" Height="140px"
+                                                 Background="transparent"
+                                                 Theme="@Syncfusion.Blazor.Theme.Material"
+                                                 EnableSmartLabels="false">
+                                <AccumulationChartCenter X="50%" Y="50%" />
+                                <AccumulationChartLegendSettings Visible="false" />
+                                <AccumulationChartMargin Top="0" Right="0" Bottom="0" Left="0" />
+                                <AccumulationChartSeriesCollection>
+                                    <AccumulationChartSeries DataSource="@HealthDonutData" XName="X" YName="Y" PointColorMapping="Color"
+                                                             InnerRadius="56%" Radius="100%"
+                                                             StartAngle="0" EndAngle="360">
+                                        <AccumulationDataLabelSettings Visible="false" />
+                                    </AccumulationChartSeries>
+                                </AccumulationChartSeriesCollection>
+                            </SfAccumulationChart>
+                        }
+                        <div class="donut-hole">
+                            <span>@HealthCounts.Total</span>
+                            <small>Projects</small>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-sm)">
+                        <div class="kpi-change @HealthClasses[HealthStatus.OnTrack]"><span class="status-dot success" aria-hidden="true"></span> @HealthCounts.OnTrack On track</div>
+                        <div class="kpi-change @HealthClasses[HealthStatus.AtRisk]"><span class="status-dot warning" aria-hidden="true"></span> @HealthCounts.AtRisk At risk</div>
+                        <div class="kpi-change @HealthClasses[HealthStatus.Critical]"><span class="status-dot error" aria-hidden="true"></span> @HealthCounts.Critical Critical</div>
+                        <div class="kpi-change @HealthClasses[HealthStatus.NotStarted]"><span class="status-dot" aria-hidden="true"></span> @HealthCounts.NotStarted Not started</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: var(--space-xl)">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Schedule at a Glance</h2>
+                    <p class="card-subtitle">Next 14 days across the portfolio</p>
+                </div>
+            </div>
+            <div class="grid-card">
+                <SfGrid @ref="_milestonesGrid"
+                        TValue="UpcomingMilestoneDto"
+                        DataSource="@_milestones"
+                        AllowResizing="true"
+                        Width="100%"
+                        GridLines="GridLine.Horizontal">
+                    <GridColumns>
+                        <GridColumn Field="@nameof(UpcomingMilestoneDto.ProjectCode)" HeaderText="Project" Width="140">
+                            <Template>
+                                @{ var m = (context as UpcomingMilestoneDto)!; }
+                                <span class="font-mono">@m.ProjectCode</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(UpcomingMilestoneDto.Title)" HeaderText="Milestone">
+                            <Template>
+                                @{ var m = (context as UpcomingMilestoneDto)!; }
+                                <span class="truncate" style="display: block; max-width: 100%">@m.Title</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(UpcomingMilestoneDto.DueDate)" HeaderText="Due Date" Width="130">
+                            <Template>
+                                @{ var m = (context as UpcomingMilestoneDto)!; }
+                                <span>@Formatters.FormatDate(m.DueDate)</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(UpcomingMilestoneDto.Owner)" HeaderText="Owner" Width="160">
+                            <Template>
+                                @{ var m = (context as UpcomingMilestoneDto)!; }
+                                <span>@(m.Owner ?? "—")</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(UpcomingMilestoneDto.HealthStatus)" HeaderText="Status" Width="130">
+                            <Template>
+                                @{ var m = (context as UpcomingMilestoneDto)!; }
+                                <span class="badge @HealthBadgeClass[m.HealthStatus]">@SplitHealthLabel(m.HealthStatus)</span>
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    }
+</div>

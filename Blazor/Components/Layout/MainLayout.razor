@@ -1,0 +1,47 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell" data-theme="@_theme">
+    <aside class="sidebar @(_menuOpen ? "is-open" : "")">
+        <div class="sidebar-brand">
+            <i class="icon icon-building-2" aria-hidden="true"></i>
+            <span>Construction</span>
+        </div>
+        <nav aria-label="Primary">
+            <ul class="nav-list">
+                @foreach (var item in NavigationItems.Primary)
+                {
+                    <li>
+                        <NavLink class="nav-item" href="@item.Path" Match="@(item.Path == "/" ? NavLinkMatch.All : NavLinkMatch.Prefix)" ActiveClass="is-active" @onclick="CloseMenu">
+                            <i class="icon icon-@item.Icon" aria-hidden="true"></i>
+                            <span>@item.Label</span>
+                        </NavLink>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </aside>
+
+    <div class="sidebar-overlay @(_menuOpen ? "is-visible" : "")" @onclick="CloseMenu" aria-hidden="true"></div>
+
+    <header class="topbar">
+        <div class="topbar-left">
+            <button type="button" class="btn btn-icon btn-ghost menu-toggle" @onclick="ToggleMenu" aria-label="Toggle navigation menu" aria-expanded="@_menuOpen">
+                <i class="icon icon-menu" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="topbar-right">
+            <button type="button" class="btn btn-icon btn-ghost" @onclick="ToggleTheme"
+                    aria-label="@($"Switch to {(_theme == "light" ? "dark" : "light")} mode")"
+                    title="@($"Switch to {(_theme == "light" ? "dark" : "light")} mode")">
+                <i class="icon icon-@(_theme == "light" ? "moon" : "sun")" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="btn btn-icon btn-ghost" aria-label="Notifications">
+                <i class="icon icon-bell" aria-hidden="true"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="main-content">
+        @Body
+    </main>
+</div>

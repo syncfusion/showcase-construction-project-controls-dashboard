@@ -1,0 +1,175 @@
+@page "/projects"
+@layout MainLayout
+@using Syncfusion.Blazor.Grids
+
+<PageTitle>Projects</PageTitle>
+
+<div class="projects-page">
+    <header class="page-header">
+        <h1>Projects</h1>
+        <p>Portfolio overview of all active and planned construction projects.</p>
+    </header>
+
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="input-with-icon">
+                <i class="icon icon-search" aria-hidden="true"></i>
+                <input type="search" class="input" placeholder="Search projects…" value="@_search" @oninput="OnSearchChanged" style="min-width: 240px" />
+            </div>
+            <select class="select" @onchange="OnStatusChanged" style="min-width: 160px">
+                @foreach (var (status, label) in StatusOptions)
+                {
+                    <option value="@(status?.ToString() ?? "")" selected="@(_status == status)">@label</option>
+                }
+            </select>
+        </div>
+        <div class="toolbar-right">
+            <button type="button" class="btn btn-secondary btn-sm" @onclick="ExportProjects" disabled="@(FilteredProjects.Count == 0)">
+                <i class="icon icon-download" aria-hidden="true"></i>Export
+            </button>
+            <button type="button" class="btn btn-primary" @onclick="OpenNewProjectModal">
+                <i class="icon icon-plus" aria-hidden="true"></i>New Project
+            </button>
+        </div>
+    </div>
+
+    @if (_loading)
+    {
+        <div class="loading-state">Loading projects…</div>
+    }
+    @if (_error is not null)
+    {
+        <div class="alert alert-error" role="alert">@_error</div>
+    }
+
+    @if (!_loading && _error is null)
+    {
+        <div class="grid-card">
+            <SfGrid @ref="_grid"
+                    TValue="ProjectDto"
+                    DataSource="@FilteredProjects"
+                    AllowPaging="true"
+                    AllowResizing="true"
+                    AllowSorting="true"
+                    Width="100%"
+                    GridLines="GridLine.Horizontal">
+                <GridPageSettings PageSize="20" PageCount="4" />
+                <GridEvents TValue="ProjectDto" RowSelected="OnProjectRowSelected" />
+                <GridColumns>
+                    <GridColumn Field="@nameof(ProjectDto.Code)" HeaderText="Project ID" Width="120">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <span class="font-mono">@p.Code</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ProjectDto.Name)" HeaderText="Name">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <span class="truncate" style="display: block; max-width: 100%">@p.Name</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ProjectDto.Location)" HeaderText="Location" Width="160">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <span>@(p.Location ?? "—")</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ProjectDto.StartDate)" HeaderText="Start Date" Width="120">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <span>@Formatters.FormatDate(p.StartDate)</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ProjectDto.EndDate)" HeaderText="Finish Date" Width="120">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <span>@Formatters.FormatDate(p.EndDate)</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ProjectDto.Progress)" HeaderText="Progress" Width="180">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <div style="min-width: 120px">
+                                <div class="progress-bar" style="max-width: 120px">
+                                    <div class="progress-fill @ProgressTone(p.Progress)" style="width: @(p.Progress)%"></div>
+                                </div>
+                                <span class="text-secondary" style="font-size: var(--text-caption-size)">@(p.Progress)%</span>
+                            </div>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ProjectDto.Budget)" HeaderText="Budget" Width="130">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <span>@Formatters.FormatCurrency(p.Budget)</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(ProjectDto.Status)" HeaderText="Status" Width="130">
+                        <Template>
+                            @{ var p = (context as ProjectDto)!; }
+                            <span class="badge @StatusBadgeClass[p.Status]">@p.Status</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="" Width="48" AllowSorting="false">
+                        <Template>
+                            <button type="button" class="btn btn-ghost btn-icon btn-sm" tabindex="-1" aria-hidden="true">
+                                <i class="icon icon-chevron-right" aria-hidden="true"></i>
+                            </button>
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    }
+
+    <Modal Open="_showNewProjectModal" Title="New Project" Subtitle="Demo template — saved to this view only; nothing is sent to the backend." Size="lg" OnClosed="() => _showNewProjectModal = false">
+        <ChildContent>
+            <div class="modal-form-grid">
+                <div class="modal-form-field is-span-2">
+                    <label for="proj-name">Project Name</label>
+                    <input id="proj-name" class="input" type="text" @bind="_draft.Name" @bind:event="oninput" required />
+                </div>
+                <div class="modal-form-field">
+                    <label for="proj-code">Project Code</label>
+                    <input id="proj-code" class="input" type="text" @bind="_draft.Code" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="proj-status">Status</label>
+                    <select id="proj-status" class="select" @bind="_draft.Status">
+                        @foreach (var s in NewProjectStatusOptions)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="modal-form-field">
+                    <label for="proj-location">Location</label>
+                    <input id="proj-location" class="input" type="text" @bind="_draft.Location" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="proj-manager">Project Manager</label>
+                    <input id="proj-manager" class="input" type="text" @bind="_draft.Manager" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="proj-start">Start Date</label>
+                    <input id="proj-start" class="input" type="date" @bind="_draft.StartDate" @bind:format="yyyy-MM-dd" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="proj-end">Finish Date</label>
+                    <input id="proj-end" class="input" type="date" @bind="_draft.EndDate" @bind:format="yyyy-MM-dd" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="proj-budget">Budget ($)</label>
+                    <input id="proj-budget" class="input" type="number" @bind="_draft.Budget" />
+                </div>
+                <div class="modal-form-field is-span-2">
+                    <label for="proj-description">Description</label>
+                    <textarea id="proj-description" class="input" rows="3" @bind="_draft.Description" @bind:event="oninput"></textarea>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn btn-secondary" @onclick="() => _showNewProjectModal = false">Cancel</button>
+            <button type="button" class="btn btn-primary" @onclick="SaveNewProject" disabled="@string.IsNullOrWhiteSpace(_draft.Name)">Save Project</button>
+        </FooterContent>
+    </Modal>
+</div>

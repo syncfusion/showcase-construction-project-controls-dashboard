@@ -1,0 +1,249 @@
+@page "/risks"
+@layout MainLayout
+@using Syncfusion.Blazor.Grids
+
+<PageTitle>Risks &amp; Issues</PageTitle>
+
+<div class="risks-page">
+    <header class="page-header">
+        <h1>Risks &amp; Issues</h1>
+        <p>Track, score, and mitigate project risks before they impact cost or schedule.</p>
+    </header>
+
+    @if (_loading)
+    {
+        <div class="loading-state" aria-live="polite">Loading risks…</div>
+    }
+    @if (_error is not null)
+    {
+        <div class="alert alert-error" role="alert">@_error</div>
+    }
+
+    @if (!_loading && _error is null)
+    {
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="input-with-icon">
+                    <i class="icon icon-search" aria-hidden="true"></i>
+                    <input type="search" class="input" placeholder="Search risks…" value="@_search" @oninput="OnSearchChanged" />
+                </div>
+                <select class="select" @onchange="OnSeverityChanged">
+                    @foreach (var (severity, label) in SeverityOptions)
+                    {
+                        <option value="@(severity?.ToString() ?? "")" selected="@(_severity == severity)">@label</option>
+                    }
+                </select>
+                <select class="select" @onchange="OnStatusChanged">
+                    @foreach (var (status, label) in StatusOptions)
+                    {
+                        <option value="@(status?.ToString() ?? "")" selected="@(_status == status)">@label</option>
+                    }
+                </select>
+            </div>
+            <div class="toolbar-right">
+                <button type="button" class="btn btn-secondary btn-sm" @onclick="ExportRisks" disabled="@(FilteredRisks.Count == 0)">
+                    <i class="icon icon-download" aria-hidden="true"></i>Export
+                </button>
+                <button type="button" class="btn btn-primary" @onclick="OpenNewRiskModal">
+                    <i class="icon icon-plus" aria-hidden="true"></i>New Risk
+                </button>
+            </div>
+        </div>
+
+        <div class="kpi-grid" style="margin-bottom: var(--space-xl)">
+            @foreach (var kpi in KpiSummary!)
+            {
+                <div class="kpi-card is-clickable" style="border-left: 4px solid @KpiBorderColor[kpi.Key]" role="button" tabindex="0"
+                     aria-label="@($"Filter risk register by {kpi.Label}")" @onclick="() => ApplyKpiFilter(kpi.Key)" @onkeydown="(e) => OnKpiKeydown(e, kpi.Key)">
+                    <div class="kpi-label">@kpi.Label</div>
+                    <div class="kpi-value @(kpi.Key == KpiKey.Critical ? "text-error" : kpi.Key == KpiKey.Mitigated ? "positive" : "")">@kpi.Value</div>
+                    <div class="kpi-change @KpiChangeTone[kpi.Key]">
+                        <i class="icon icon-@KpiIcon[kpi.Key]" aria-hidden="true"></i>@KpiChangeLabel[kpi.Key]
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card">
+            <div class="card-header"><div><h2 class="card-title">Risk Register</h2><p class="card-subtitle">Open items across portfolio</p></div></div>
+            <div class="grid-card">
+                <SfGrid @ref="_risksGrid"
+                        TValue="RiskDto"
+                        DataSource="@FilteredRisks"
+                        AllowPaging="true"
+                        AllowResizing="true"
+                        AllowSorting="true"
+                        Width="100%"
+                        GridLines="GridLine.Horizontal">
+                    <GridPageSettings PageSize="20" PageCount="4" />
+                    <GridEvents TValue="RiskDto" RowSelected="OnRiskRowSelected" />
+                    <GridColumns>
+                        <GridColumn Field="@nameof(RiskDto.Number)" HeaderText="ID" Width="100">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span class="font-mono">@r.Number</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(RiskDto.Title)" HeaderText="Risk / Issue">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span style="font-weight: 600">@r.Title</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(RiskDto.ProjectCode)" HeaderText="Project" Width="180">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span class="truncate" style="display: block; max-width: 100%">@r.ProjectCode</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(RiskDto.Severity)" HeaderText="Severity" Width="120">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span class="badge @SeverityBadgeClass[r.Severity]">@r.Severity</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(RiskDto.Probability)" HeaderText="Probability" Width="120">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span>@r.Probability</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn HeaderText="Impact" Width="140">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span>@FormatImpact(r.ImpactDays, r.ImpactCost)</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(RiskDto.Owner)" HeaderText="Owner" Width="160">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span>@(r.Owner ?? "—")</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(RiskDto.Status)" HeaderText="Mitigation Status" Width="160">
+                            <Template>
+                                @{ var r = (context as RiskDto)!; }
+                                <span class="badge @StatusBadgeClass[r.Status]">@r.Status</span>
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+
+        <div class="card risk-matrix-card">
+            <div class="card-header"><div><h2 class="card-title">Risk Matrix</h2><p class="card-subtitle">Probability × Impact</p></div></div>
+            <div class="risk-matrix">
+                @foreach (var probability in ReversedProbabilities)
+                {
+                    <div class="risk-matrix-row">
+                        <div class="risk-matrix-label text-secondary">@probability</div>
+                        @foreach (var severity in Severities)
+                        {
+                            <div class="risk-matrix-cell @MatrixClass(MatrixTone(severity, probability))">@MatrixCellDisplay(probability, severity)</div>
+                        }
+                    </div>
+                }
+                <div class="risk-matrix-row">
+                    <div></div>
+                    @foreach (var s in Severities)
+                    {
+                        <div class="risk-matrix-axis text-secondary">@s</div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <Modal Open="_selectedRisk is not null" Title="@(_selectedRisk?.Title ?? "")"
+           Subtitle="@(_selectedRisk is not null ? $"{_selectedRisk.Number} · {_selectedRisk.ProjectCode}" : null)" Size="lg" OnClosed="() => _selectedRisk = null">
+        <ChildContent>
+            @if (_selectedRisk is not null)
+            {
+                <div class="modal-detail-grid">
+                    <div class="modal-detail-item"><span class="modal-detail-label">Severity</span><span class="badge @SeverityBadgeClass[_selectedRisk.Severity]" style="width: fit-content">@_selectedRisk.Severity</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Status</span><span class="badge @StatusBadgeClass[_selectedRisk.Status]" style="width: fit-content">@_selectedRisk.Status</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Probability</span><span class="modal-detail-value">@_selectedRisk.Probability</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Impact</span><span class="modal-detail-value">@FormatImpact(_selectedRisk.ImpactDays, _selectedRisk.ImpactCost)</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Owner</span><span class="modal-detail-value">@(_selectedRisk.Owner ?? "—")</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Identified</span><span class="modal-detail-value">@Formatters.FormatDate(_selectedRisk.IdentifiedDate)</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Target Resolution</span><span class="modal-detail-value">@(_selectedRisk.TargetResolutionDate is not null ? Formatters.FormatDate(_selectedRisk.TargetResolutionDate) : "—")</span></div>
+                    <div class="modal-detail-item"><span class="modal-detail-label">Closed</span><span class="modal-detail-value">@(_selectedRisk.ClosedDate is not null ? Formatters.FormatDate(_selectedRisk.ClosedDate) : "—")</span></div>
+                    @if (!string.IsNullOrEmpty(_selectedRisk.Description))
+                    {
+                        <div class="modal-detail-item is-span-2"><span class="modal-detail-label">Description</span><span class="modal-detail-value" style="font-weight: 400">@_selectedRisk.Description</span></div>
+                    }
+                    @if (!string.IsNullOrEmpty(_selectedRisk.MitigationPlan))
+                    {
+                        <div class="modal-detail-item is-span-2"><span class="modal-detail-label">Mitigation Plan</span><span class="modal-detail-value" style="font-weight: 400">@_selectedRisk.MitigationPlan</span></div>
+                    }
+                </div>
+            }
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn btn-secondary" @onclick="() => _selectedRisk = null">Close</button>
+            <button type="button" class="btn btn-primary" @onclick="ViewProjectDetails">
+                <i class="icon icon-external-link" aria-hidden="true"></i>View Project Details
+            </button>
+        </FooterContent>
+    </Modal>
+
+    <Modal Open="_showNewRiskModal" Title="New Risk" Subtitle="Demo template — saved to this view only; nothing is sent to the backend." Size="lg" OnClosed="() => _showNewRiskModal = false">
+        <ChildContent>
+            <div class="modal-form-grid">
+                <div class="modal-form-field is-span-2">
+                    <label for="risk-title">Title</label>
+                    <input id="risk-title" class="input" type="text" @bind="_draft.Title" @bind:event="oninput" required />
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-project-id">Project ID</label>
+                    <input id="risk-project-id" class="input" type="number" @bind="_draft.ProjectId" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-project-code">Project Code</label>
+                    <input id="risk-project-code" class="input" type="text" @bind="_draft.ProjectCode" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-severity">Severity</label>
+                    <select id="risk-severity" class="select" @bind="_draft.Severity">
+                        @foreach (var s in Severities) { <option value="@s">@s</option> }
+                    </select>
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-probability">Probability</label>
+                    <select id="risk-probability" class="select" @bind="_draft.Probability">
+                        @foreach (var p in Probabilities) { <option value="@p">@p</option> }
+                    </select>
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-owner">Owner</label>
+                    <input id="risk-owner" class="input" type="text" @bind="_draft.Owner" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-target-date">Target Resolution</label>
+                    <input id="risk-target-date" class="input" type="date" @bind="_draft.TargetResolutionDate" @bind:format="yyyy-MM-dd" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-impact-days">Schedule Impact (days)</label>
+                    <input id="risk-impact-days" class="input" type="number" @bind="_draft.ImpactDays" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field">
+                    <label for="risk-impact-cost">Cost Impact ($)</label>
+                    <input id="risk-impact-cost" class="input" type="number" @bind="_draft.ImpactCost" @bind:event="oninput" />
+                </div>
+                <div class="modal-form-field is-span-2">
+                    <label for="risk-description">Description</label>
+                    <textarea id="risk-description" class="input" rows="2" @bind="_draft.Description" @bind:event="oninput"></textarea>
+                </div>
+                <div class="modal-form-field is-span-2">
+                    <label for="risk-mitigation">Mitigation Plan</label>
+                    <textarea id="risk-mitigation" class="input" rows="3" @bind="_draft.MitigationPlan" @bind:event="oninput"></textarea>
+                </div>
+            </div>
+        </ChildContent>
+        <FooterContent>
+            <button type="button" class="btn btn-secondary" @onclick="() => _showNewRiskModal = false">Cancel</button>
+            <button type="button" class="btn btn-primary" @onclick="SaveNewRisk" disabled="@string.IsNullOrWhiteSpace(_draft.Title)">Save Risk</button>
+        </FooterContent>
+    </Modal>
+</div>

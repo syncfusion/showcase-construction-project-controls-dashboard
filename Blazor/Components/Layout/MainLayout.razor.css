@@ -1,0 +1,162 @@
+/* Shell layout — ports the design system shared/layout.css and wraps the app.
+   Note: .nav-item rules live in the global stylesheet, not here — NavLink is a
+   built-in Blazor component, so the <a> it renders never receives this
+   component's CSS-isolation scope attribute (only content passed to it as
+   ChildContent, like the icon/label inside, does). Scoped rules targeting
+   .nav-item itself would silently never match. Same root cause as the Modal
+   fix: scoped CSS only reaches markup authored directly in this .razor file. */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--topbar-height) 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  grid-row: 1 / -1;
+  background: var(--sidebar-bg);
+  border-right: var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  height: var(--topbar-height);
+  padding: 0 var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 700;
+  font-size: var(--text-h4-size);
+  color: var(--color-primary);
+}
+
+.sidebar-brand .icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-md) var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nav-section-title {
+  padding: var(--space-md) var(--space-md) var(--space-xs);
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.topbar {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 0 var(--space-xl);
+  background: var(--topbar-bg);
+  border-bottom: var(--topbar-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Hamburger menu toggle. Hidden by default because the sidebar is always
+   visible on desktop and tablet widths. Specificity (.topbar .menu-toggle,
+   0,2,0) intentionally exceeds .btn's single-class rule (0,1,0) in
+   global.css so the display:none wins regardless of CSS load order. */
+.topbar .menu-toggle {
+  display: none;
+}
+
+.main-content {
+  grid-column: 2;
+  grid-row: 2;
+  padding: var(--space-xl);
+  overflow-y: auto;
+  background: var(--color-background);
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+  .app-shell {
+    grid-template-columns: 72px 1fr;
+  }
+  .sidebar-brand span {
+    display: none;
+  }
+  .nav-list {
+    padding: var(--space-md) var(--space-sm);
+  }
+}
+
+@media (max-width: 767px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(280px, 80vw);
+    transform: translateX(-100%);
+    z-index: 20;
+    transition: transform 0.2s ease;
+  }
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+  .sidebar.is-open .sidebar-brand span {
+    display: inline;
+  }
+  .topbar {
+    grid-column: 1;
+  }
+  .main-content {
+    grid-column: 1;
+  }
+  .topbar .menu-toggle {
+    display: inline-flex;
+  }
+  /* When the mobile drawer is open, the dimmed overlay (sidebar-overlay)
+     covers the page and acts as the close affordance. Hide the hamburger
+     so the toolbar reads cleanly while the sidebar is showing. The same
+     specificity (.sidebar.is-open ~ .topbar .menu-toggle, 0,3,0) exceeds
+     the show rule above (0,2,0) and wins by source order + specificity. */
+  .sidebar.is-open ~ .topbar .menu-toggle {
+    display: none;
+  }
+  .sidebar-overlay.is-visible {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 15;
+  }
+}

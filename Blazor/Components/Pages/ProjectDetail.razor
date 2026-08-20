@@ -1,0 +1,482 @@
+@page "/projects/{Id:int}"
+@layout MainLayout
+@using Syncfusion.Blazor.SfPdfViewer
+@using Syncfusion.Blazor.Grids
+
+<PageTitle>Project Detail</PageTitle>
+
+<div class="project-detail-page">
+    @if (_error is not null)
+    {
+        <div class="alert alert-error" role="alert">@_error</div>
+    }
+    else if (_loading)
+    {
+        <div class="loading-state" aria-live="polite">Loading project details…</div>
+    }
+
+    @if (!_loading && _error is null && _project is not null && _kpis is not null)
+    {
+        <div class="page-header">
+            <div class="breadcrumb">
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" @onclick="GoBack" aria-label="Back to projects">
+                    <i class="icon icon-arrow-left" aria-hidden="true"></i>
+                </button>
+                <span>Projects</span>
+                <span>/</span>
+                <span class="font-mono">@_project.Code</span>
+            </div>
+            <h1>@_project.Name</h1>
+            <p>@HeaderSubtitle</p>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Project detail tabs">
+            @foreach (var tab in Tabs)
+            {
+                <button type="button" role="tab" aria-selected="@(_activeTab == tab)" class="tab @(_activeTab == tab ? "is-active" : "")" @onclick="() => _activeTab = tab">
+                    @tab
+                    @if (TabBadge(tab) > 0)
+                    {
+                        <span class="badge badge-error" style="margin-left: 8px">@TabBadge(tab)</span>
+                    }
+                </button>
+            }
+        </div>
+
+        @if (_activeTab == "Overview")
+        {
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-label">Percent Complete</div>
+                    <div class="kpi-value">@(_kpis.PercentComplete)%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill @(_kpis.PercentComplete >= 75 ? "is-success" : _kpis.PercentComplete >= 40 ? "is-warning" : "is-error")" style="width: @(Math.Clamp(_kpis.PercentComplete, 0, 100))%"></div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Cost Variance</div>
+                    <div class="kpi-value @(_kpis.CostVariance >= 0 ? "text-success" : "text-error")">
+                        @(_kpis.CostVariance >= 0 ? "+" : "-")@Formatters.FormatCurrency(Math.Abs(_kpis.CostVariance))
+                    </div>
+                    <div class="kpi-change @(_kpis.CostVariance >= 0 ? "positive" : "negative")">
+                        <i class="icon icon-@(_kpis.CostVariance >= 0 ? "arrow-up-right" : "arrow-down-right")" aria-hidden="true"></i>
+                        @(_kpis.CostVariance >= 0 ? "Under budget" : "Over budget")
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Schedule Variance</div>
+                    <div class="kpi-value @(_kpis.ScheduleVariance >= 0 ? "text-success" : "text-error")">@FormatPercent(_kpis.ScheduleVariance)</div>
+                    <div class="kpi-change @(_kpis.ScheduleVariance >= 0 ? "positive" : "negative")">
+                        <i class="icon icon-@(_kpis.ScheduleVariance >= 0 ? "arrow-up-right" : "arrow-down-right")" aria-hidden="true"></i>
+                        @(_kpis.ScheduleVariance >= 0 ? "Ahead of schedule" : "Behind schedule")
+                    </div>
+                </div>
+                <div class="kpi-card is-clickable" role="button" tabindex="0" @onclick='() => GoTo("/rfis")' @onkeydown="OnOpenRfisKeydown">
+                    <div class="kpi-label">Open RFIs</div>
+                    <div class="kpi-value">@_kpis.OpenRfis</div>
+                    <div class="kpi-change @(_kpis.OverdueRfis > 0 ? "warning" : "positive")">
+                        <i class="icon icon-@(_kpis.OverdueRfis > 0 ? "clock" : "check-circle")" aria-hidden="true"></i>
+                        @(_kpis.OverdueRfis > 0 ? $"{_kpis.OverdueRfis} overdue" : "No overdue")
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Open Submittals</div>
+                    <div class="kpi-value">@_kpis.OpenSubmittals</div>
+                    <div class="kpi-change @(_kpis.OverdueSubmittals > 0 ? "warning" : "positive")">
+                        <i class="icon icon-@(_kpis.OverdueSubmittals > 0 ? "clock" : "check-circle")" aria-hidden="true"></i>
+                        @(_kpis.OverdueSubmittals > 0 ? $"{_kpis.OverdueSubmittals} overdue" : "On track")
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Pending Change Orders</div>
+                    <div class="kpi-value">@Formatters.FormatCurrency(_kpis.PendingChangeOrdersAmount)</div>
+                    <div class="kpi-change @(_kpis.PendingChangeOrdersAmount > 0 ? "warning" : "positive")">
+                        <i class="icon icon-@(_kpis.PendingChangeOrdersAmount > 0 ? "file-plus" : "check-circle")" aria-hidden="true"></i>
+                        @(_kpis.PendingChangeOrdersAmount > 0 ? $"{_kpis.OpenChangeOrders} pending review" : "No pending COs")
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div><h2 class="card-title">Upcoming Milestones</h2><p class="card-subtitle">Next 30 days</p></div>
+                    </div>
+                    <div class="grid-card">
+                        <SfGrid TValue="MilestoneDto"
+                                DataSource="@_milestones"
+                                AllowResizing="true"
+                                Width="100%"
+                                GridLines="GridLine.Horizontal">
+                            <GridColumns>
+                                <GridColumn Field="@nameof(MilestoneDto.Title)" HeaderText="Milestone">
+                                    <Template>
+                                        @{ var m = (context as MilestoneDto)!; }
+                                        <span class="truncate" style="display: block; max-width: 100%">@m.Title</span>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="@nameof(MilestoneDto.PlannedDate)" HeaderText="Planned Date" Width="140">
+                                    <Template>
+                                        @{ var m = (context as MilestoneDto)!; }
+                                        <span>@Formatters.FormatDate(m.PlannedDate)</span>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="@nameof(MilestoneDto.Status)" HeaderText="Status" Width="140">
+                                    <Template>
+                                        @{ var m = (context as MilestoneDto)!; }
+                                        <span class="badge @MilestoneStatusBadgeClass[m.Status]">@MilestoneStatusLabel[m.Status]</span>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="@nameof(MilestoneDto.Owner)" HeaderText="Owner" Width="160">
+                                    <Template>
+                                        @{ var m = (context as MilestoneDto)!; }
+                                        <span>@(m.Owner ?? "—")</span>
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div><h2 class="card-title">Risk Register</h2><p class="card-subtitle">Top open items</p></div>
+                    </div>
+                    <div class="card-body">
+                        @if (_risks.Count == 0)
+                        {
+                            <div class="text-secondary" style="text-align: center">No open risks</div>
+                        }
+                        @foreach (var r in _risks)
+                        {
+                            <div class="alert @(RiskAlertClass.GetValueOrDefault(r.Severity.ToString(), "alert-info"))">
+                                <i class="icon icon-@(r.Severity == RiskSeverity.Critical ? "shield-alert" : "alert-triangle")" aria-hidden="true"></i>
+                                <div>
+                                    <div style="font-weight: 600">@r.Title</div>
+                                    <div style="font-size: var(--text-caption-size); opacity: 0.9">
+                                        @r.ImpactDisplay@(r.Owner is not null ? $" · Owner: {r.Owner}" : "")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div><h2 class="card-title">Document Workflow</h2><p class="card-subtitle">Last 30 days · @_project.Code</p></div>
+                    <div class="toolbar-right">
+                        <button type="button" class="btn btn-ghost btn-sm text-secondary" @onclick='() => GoTo("/documents")'>
+                            <i class="icon icon-file-text" aria-hidden="true"></i> View documents
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-sm text-secondary" @onclick='() => GoTo("/rfis")'>
+                            <i class="icon icon-message-square" aria-hidden="true"></i> View RFIs
+                        </button>
+                    </div>
+                </div>
+                <div class="grid-card document-grid">
+                    <SfGrid TValue="RecentDocumentDto"
+                            DataSource="@_documents"
+                            AllowResizing="true"
+                            Width="100%"
+                            GridLines="GridLine.Horizontal">
+                        <GridEvents TValue="RecentDocumentDto" RowSelected="OnDocumentRowSelected" />
+                        <GridColumns>
+                            <GridColumn Field="@nameof(RecentDocumentDto.Title)" HeaderText="Document">
+                                <Template>
+                                    @{ var d = (context as RecentDocumentDto)!; }
+                                    <span class="truncate" style="display: block; max-width: 100%">@d.Title</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RecentDocumentDto.Type)" HeaderText="Type" Width="140">
+                                <Template>
+                                    @{ var d = (context as RecentDocumentDto)!; }
+                                    <span>@d.Type</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RecentDocumentDto.Revision)" HeaderText="Revision" Width="100">
+                                <Template>
+                                    @{ var d = (context as RecentDocumentDto)!; }
+                                    <span class="font-mono">@(d.Revision ?? "—")</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RecentDocumentDto.SubmittedDate)" HeaderText="Submitted" Width="130">
+                                <Template>
+                                    @{ var d = (context as RecentDocumentDto)!; }
+                                    <span>@Formatters.FormatDate(d.SubmittedDate)</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RecentDocumentDto.Status)" HeaderText="Status" Width="140">
+                                <Template>
+                                    @{ var d = (context as RecentDocumentDto)!; }
+                                    <span class="badge @DocumentStatusClass(d.Status)">@d.Status</span>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: var(--space-xl)">
+                <div class="card-header">
+                    <div><h2 class="card-title">Project Details</h2><p class="card-subtitle">General information</p></div>
+                </div>
+                <ul class="meta-list">
+                    <li><span class="meta-label">Status</span><span class="badge @HealthBadgeClass[_project.HealthStatus]">@_project.Status</span></li>
+                    <li><span class="meta-label">Health</span><span class="badge @HealthBadgeClass[_project.HealthStatus]">@SplitHealthLabel(_project.HealthStatus)</span></li>
+                    <li><span class="meta-label">Project Manager</span><span class="meta-value">@(_project.Manager ?? "—")</span></li>
+                    <li><span class="meta-label">Duration</span><span class="meta-value">@Formatters.FormatDate(_project.StartDate) – @Formatters.FormatDate(_project.EndDate)</span></li>
+                    <li><span class="meta-label">Location</span><span class="meta-value">@(_project.Location ?? "—")</span></li>
+                    <li><span class="meta-label">Budget</span><span class="meta-value">@Formatters.FormatCurrency(_project.Budget)</span></li>
+                </ul>
+            </div>
+
+            <Modal Open="_previewDocument is not null" Title="@(_previewDocument?.Title ?? "")"
+                   Subtitle="@(_previewDocument is not null ? $"{_previewDocument.Type} · Rev {_previewDocument.Revision ?? "—"} · Submitted {Formatters.FormatDate(_previewDocument.SubmittedDate)}" : null)"
+                   Size="xl" OnClosed="() => _previewDocument = null">
+                <ChildContent>
+                    @if (_previewDocument is not null)
+                    {
+                        <div class="modal-detail-grid">
+                            <div class="modal-detail-item"><span class="modal-detail-label">Document #</span><span class="modal-detail-value font-mono">@_previewDocument.DocumentNumber</span></div>
+                            <div class="modal-detail-item"><span class="modal-detail-label">Status</span><span class="badge @DocumentStatusClass(_previewDocument.Status)" style="width: fit-content">@_previewDocument.Status</span></div>
+                        </div>
+                        <div style="height: 620px; border-radius: var(--radius-md); overflow: hidden">
+                            <SfPdfViewer2 DocumentPath="@SamplePdfUrl" Height="620px" Width="100%"></SfPdfViewer2>
+                        </div>
+                    }
+                </ChildContent>
+            </Modal>
+        }
+
+        @if (_activeTab == "Schedule")
+        {
+            <h2 class="section-title">Schedule</h2>
+            <p class="section-subtitle">Key milestones and planned dates for the project.</p>
+            <div class="grid-card" style="margin-top: var(--space-lg)">
+                <SfGrid TValue="MilestoneDto"
+                        DataSource="@_milestones"
+                        AllowResizing="true"
+                        AllowSorting="true"
+                        Width="100%"
+                        GridLines="GridLine.Horizontal">
+                    <GridColumns>
+                        <GridColumn Field="@nameof(MilestoneDto.Title)" HeaderText="Milestone">
+                            <Template>
+                                @{ var m = (context as MilestoneDto)!; }
+                                <span style="font-weight: 600">@m.Title</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(MilestoneDto.Description)" HeaderText="Description">
+                            <Template>
+                                @{ var m = (context as MilestoneDto)!; }
+                                <span class="text-secondary truncate" style="display: block; max-width: 100%">@(m.Description ?? "—")</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(MilestoneDto.PlannedDate)" HeaderText="Planned Date" Width="140">
+                            <Template>
+                                @{ var m = (context as MilestoneDto)!; }
+                                <span>@Formatters.FormatDate(m.PlannedDate)</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(MilestoneDto.Status)" HeaderText="Status" Width="140">
+                            <Template>
+                                @{ var m = (context as MilestoneDto)!; }
+                                <span class="badge @MilestoneStatusBadgeClass[m.Status]">@MilestoneStatusLabel[m.Status]</span>
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(MilestoneDto.Owner)" HeaderText="Owner" Width="160">
+                            <Template>
+                                @{ var m = (context as MilestoneDto)!; }
+                                <span>@(m.Owner ?? "—")</span>
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        }
+
+        @if (_activeTab == "Cost")
+        {
+            <h2 class="section-title">Cost Control</h2>
+            <p class="section-subtitle">Budget status, cost variance, and pending change orders.</p>
+            <div class="kpi-grid" style="margin-top: var(--space-lg)">
+                <div class="kpi-card"><div class="kpi-label">Budget</div><div class="kpi-value">@Formatters.FormatCurrency(_kpis.Budget)</div></div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Spent</div>
+                    <div class="kpi-value">@Formatters.FormatCurrency(_kpis.Spent)</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill @(_kpis.Budget != 0 && _kpis.Spent / _kpis.Budget > 0.9m ? "is-error" : "is-success")" style="width: @(SpentPercent(_kpis.Spent, _kpis.Budget))%"></div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Cost Variance</div>
+                    <div class="kpi-value @(_kpis.CostVariance >= 0 ? "text-success" : "text-error")">
+                        @(_kpis.CostVariance >= 0 ? "+" : "-")@Formatters.FormatCurrency(Math.Abs(_kpis.CostVariance))
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Pending Change Orders</div>
+                    <div class="kpi-value">@Formatters.FormatCurrency(_kpis.PendingChangeOrdersAmount)</div>
+                    <div class="kpi-change @(_kpis.PendingChangeOrdersAmount > 0 ? "warning" : "positive")">@_kpis.OpenChangeOrders open</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div><h2 class="card-title">Change Orders</h2><p class="card-subtitle">Pending and approved project changes</p></div></div>
+                <div class="grid-card">
+                    <SfGrid TValue="ChangeOrderSummaryDto"
+                            DataSource="@_changeOrders"
+                            AllowResizing="true"
+                            AllowSorting="true"
+                            Width="100%"
+                            GridLines="GridLine.Horizontal">
+                        <GridColumns>
+                            <GridColumn Field="@nameof(ChangeOrderSummaryDto.Number)" HeaderText="Number" Width="100">
+                                <Template>
+                                    @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                    <span class="font-mono">@co.Number</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(ChangeOrderSummaryDto.Description)" HeaderText="Description">
+                                <Template>
+                                    @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                    <span class="truncate" style="display: block; max-width: 100%">@co.Description</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(ChangeOrderSummaryDto.Amount)" HeaderText="Amount" Width="140">
+                                <Template>
+                                    @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                    <span>@Formatters.FormatCurrency(co.Amount)</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(ChangeOrderSummaryDto.Status)" HeaderText="Status" Width="140">
+                                <Template>
+                                    @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                    <span class="badge @ChangeOrderStatusClass(co.Status)">@co.Status</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(ChangeOrderSummaryDto.RequestedBy)" HeaderText="Requested By" Width="180">
+                                <Template>
+                                    @{ var co = (context as ChangeOrderSummaryDto)!; }
+                                    <span>@(co.RequestedBy ?? "—")</span>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        }
+
+        @if (_activeTab == "RFIs")
+        {
+            <div class="card">
+                <div class="card-header">
+                    <div><h2 class="card-title">RFI Log</h2><p class="card-subtitle">Discipline, impact, and status</p></div>
+                    <div class="toolbar-right">
+                        <button type="button" class="btn btn-ghost btn-sm text-secondary" @onclick='() => GoTo("/rfis")'>
+                            <i class="icon icon-message-square" aria-hidden="true"></i> View all
+                        </button>
+                    </div>
+                </div>
+                <div class="grid-card">
+                    <SfGrid TValue="RfiSummaryDto"
+                            DataSource="@_rfis"
+                            AllowResizing="true"
+                            AllowSorting="true"
+                            Width="100%"
+                            GridLines="GridLine.Horizontal">
+                        <GridColumns>
+                            <GridColumn Field="@nameof(RfiSummaryDto.Number)" HeaderText="Number" Width="100">
+                                <Template>
+                                    @{ var r = (context as RfiSummaryDto)!; }
+                                    <span class="font-mono">@r.Number</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RfiSummaryDto.Subject)" HeaderText="Subject">
+                                <Template>
+                                    @{ var r = (context as RfiSummaryDto)!; }
+                                    <span class="truncate" style="display: block; max-width: 100%">@r.Subject</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RfiSummaryDto.Discipline)" HeaderText="Discipline" Width="160">
+                                <Template>
+                                    @{ var r = (context as RfiSummaryDto)!; }
+                                    <span>@(r.Discipline ?? "—")</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RfiSummaryDto.Status)" HeaderText="Status" Width="160">
+                                <Template>
+                                    @{ var r = (context as RfiSummaryDto)!; }
+                                    <span class="badge @RfiStatusClass(r.Status)">@r.Status</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(RfiSummaryDto.DueDate)" HeaderText="Due" Width="130">
+                                <Template>
+                                    @{ var r = (context as RfiSummaryDto)!; }
+                                    <span>@(r.DueDate is not null ? Formatters.FormatDate(r.DueDate) : "—")</span>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        }
+
+        @if (_activeTab == "Submittals")
+        {
+            <h2 class="section-title">Submittals</h2>
+            <p class="section-subtitle">Material and shop drawing submittals by specification section.</p>
+            <div class="card" style="margin-top: var(--space-lg)">
+                <div class="card-header"><div><h2 class="card-title">Submittal Register</h2><p class="card-subtitle">Type, specification section, and approval status</p></div></div>
+                <div class="grid-card">
+                    <SfGrid TValue="SubmittalSummaryDto"
+                            DataSource="@_submittals"
+                            AllowResizing="true"
+                            AllowSorting="true"
+                            Width="100%"
+                            GridLines="GridLine.Horizontal">
+                        <GridColumns>
+                            <GridColumn Field="@nameof(SubmittalSummaryDto.Number)" HeaderText="Number" Width="100">
+                                <Template>
+                                    @{ var s = (context as SubmittalSummaryDto)!; }
+                                    <span class="font-mono">@s.Number</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(SubmittalSummaryDto.Description)" HeaderText="Description">
+                                <Template>
+                                    @{ var s = (context as SubmittalSummaryDto)!; }
+                                    <span class="truncate" style="display: block; max-width: 100%">@s.Description</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(SubmittalSummaryDto.SubmittalType)" HeaderText="Type" Width="160">
+                                <Template>
+                                    @{ var s = (context as SubmittalSummaryDto)!; }
+                                    <span>@(s.SubmittalType ?? "—")</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(SubmittalSummaryDto.Discipline)" HeaderText="Discipline" Width="160">
+                                <Template>
+                                    @{ var s = (context as SubmittalSummaryDto)!; }
+                                    <span>@(s.Discipline ?? "—")</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Spec Section" Width="120">
+                                <Template>
+                                    <span>—</span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="@nameof(SubmittalSummaryDto.Status)" HeaderText="Status" Width="140">
+                                <Template>
+                                    @{ var s = (context as SubmittalSummaryDto)!; }
+                                    <span class="badge @SubmittalStatusClass(s.Status)">@s.Status</span>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,127 @@
+.cost-control-page {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.cost-control-page .earned-value-legend {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  font-size: var(--text-caption-size);
+  color: var(--color-secondary);
+}
+
+.cost-control-page .earned-value-legend .legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+
+.cost-control-page .cost-heatmap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.cost-control-page .cost-heatmap-cell {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--text-small-size);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.cost-control-page .cost-heatmap-cell span {
+  font-size: var(--text-h4-size);
+  font-weight: 700;
+}
+
+.cost-control-page .cost-heatmap-cell.is-positive {
+  background: var(--color-success-background);
+  color: var(--color-success);
+}
+
+.cost-control-page .cost-heatmap-cell.is-warning {
+  background: var(--color-warning-background);
+  color: var(--color-warning);
+}
+
+.cost-control-page .cost-heatmap-cell.is-negative {
+  background: var(--color-error-background);
+  color: var(--color-error);
+}
+
+.cost-control-page .change-order-card {
+  margin-top: var(--space-xl);
+}
+
+.cost-control-page .change-order-card .data-table tbody tr {
+  cursor: pointer;
+}
+
+/* Change order filter toolbar (mirrors .projects-page .toolbar) */
+.cost-control-page .co-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin: 0 0 var(--space-lg) 0;
+  flex-wrap: wrap;
+}
+
+.cost-control-page .co-toolbar .toolbar-left,
+.cost-control-page .co-toolbar .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.cost-control-page .co-toolbar .input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .icon-search {
+  position: absolute;
+  left: 12px;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input,
+.cost-control-page .co-toolbar .select {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-primary);
+  font-size: var(--text-small-size);
+  line-height: 1;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input {
+  padding-left: 36px;
+  min-width: 240px;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input:focus,
+.cost-control-page .co-toolbar .select:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus-ring);
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input::placeholder {
+  color: var(--color-muted);
+}
+
+.cost-control-page .co-toolbar .select {
+  min-width: 160px;
+  appearance: auto;
+}
