@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="backend/Construction.Api/Construction.Api.csproj" />
-  <Project Path="backend/Construction.Core/Construction.Core.csproj" />
-  <Project Path="backend/Construction.Infrastructure/Construction.Infrastructure.csproj" />
-  <Project Path="backend/Construction.Tests/Construction.Tests.csproj" />
-</Solution>

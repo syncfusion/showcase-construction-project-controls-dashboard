@@ -1,0 +1,499 @@
+<div class="project-detail-page">
+  <!--
+    Topbar breadcrumb template — captured by ViewChild in the component and
+    pushed into the topbar's left slot via OutletContextService so the
+    "Projects / PRJ-XXXX" breadcrumb + back button replace the static
+    page-meta fallback while on the project-detail route.
+  -->
+  <ng-template #topbarBreadcrumb>
+    <div class="topbar-breadcrumb">
+      <button
+        type="button"
+        class="btn btn-ghost btn-icon btn-sm"
+        (click)="goBack()"
+        aria-label="Back to projects"
+      >
+        <app-icon name="arrow-left" [size]="16" />
+      </button>
+      <span>Projects</span>
+      <span aria-hidden="true">/</span>
+      <span class="font-mono">{{ project()?.code }}</span>
+    </div>
+  </ng-template>
+
+  @if (error()) {
+    <div class="alert alert-error" role="alert">{{ error() }}</div>
+  } @else if (loading()) {
+    <div class="loading-state" aria-live="polite">Loading project details…</div>
+  }
+
+  @if (!loading() && !error() && project() && kpis(); as ready) {
+    <div class="page-header">
+      <div class="breadcrumb">
+        <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="goBack()" aria-label="Back to projects">
+          <app-icon name="arrow-left" [size]="16" />
+        </button>
+        <span>Projects</span>
+        <span>/</span>
+        <span class="font-mono">{{ project()!.code }}</span>
+      </div>
+      <h1>{{ project()!.name }}</h1>
+      <p>{{ headerSubtitle }}</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Project detail tabs">
+      @for (tab of tabs; track tab) {
+        <button
+          type="button"
+          role="tab"
+          [attr.aria-selected]="activeTab() === tab"
+          class="tab"
+          [class.is-active]="activeTab() === tab"
+          (click)="activeTab.set(tab)"
+        >
+          {{ tab }}
+          @if (tabBadge(tab) > 0) {
+            <span class="badge badge-error" style="margin-left: 8px">{{ tabBadge(tab) }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    @if (activeTab() === 'Overview') {
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Percent Complete</div>
+          <div class="kpi-value">{{ kpis()!.percentComplete }}%</div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [class]="kpis()!.percentComplete >= 75 ? 'is-success' : kpis()!.percentComplete >= 40 ? 'is-warning' : 'is-error'"
+              [style.width.%]="kpis()!.percentComplete"
+            ></div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cost Variance</div>
+          <div class="kpi-value" [class]="kpis()!.costVariance >= 0 ? 'text-success' : 'text-error'">
+            {{ kpis()!.costVariance >= 0 ? '+' : '-' }}{{ formatCurrency(kpis()!.costVariance < 0 ? -kpis()!.costVariance : kpis()!.costVariance) }}
+          </div>
+          <div class="kpi-change" [class]="kpis()!.costVariance >= 0 ? 'positive' : 'negative'">
+            <app-icon [name]="kpis()!.costVariance >= 0 ? 'arrow-up-right' : 'arrow-down-right'" [size]="14" />
+            {{ kpis()!.costVariance >= 0 ? 'Under budget' : 'Over budget' }}
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Schedule Variance</div>
+          <div class="kpi-value" [class]="kpis()!.scheduleVariance >= 0 ? 'text-success' : 'text-error'">
+            {{ formatPercent(kpis()!.scheduleVariance) }}
+          </div>
+          <div class="kpi-change" [class]="kpis()!.scheduleVariance >= 0 ? 'positive' : 'negative'">
+            <app-icon [name]="kpis()!.scheduleVariance >= 0 ? 'arrow-up-right' : 'arrow-down-right'" [size]="14" />
+            {{ kpis()!.scheduleVariance >= 0 ? 'Ahead of schedule' : 'Behind schedule' }}
+          </div>
+        </div>
+        <div class="kpi-card is-clickable" role="button" tabindex="0" (click)="goTo('/rfis')" (keydown)="onOpenRfisKeydown($event)">
+          <div class="kpi-label">Open RFIs</div>
+          <div class="kpi-value">{{ kpis()!.openRfis }}</div>
+          <div class="kpi-change" [class]="kpis()!.overdueRfis > 0 ? 'warning' : 'positive'">
+            <app-icon [name]="kpis()!.overdueRfis > 0 ? 'clock' : 'check-circle'" [size]="14" />
+            {{ kpis()!.overdueRfis > 0 ? kpis()!.overdueRfis + ' overdue' : 'No overdue' }}
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Open Submittals</div>
+          <div class="kpi-value">{{ kpis()!.openSubmittals }}</div>
+          <div class="kpi-change" [class]="kpis()!.overdueSubmittals > 0 ? 'warning' : 'positive'">
+            <app-icon [name]="kpis()!.overdueSubmittals > 0 ? 'clock' : 'check-circle'" [size]="14" />
+            {{ kpis()!.overdueSubmittals > 0 ? kpis()!.overdueSubmittals + ' overdue' : 'On track' }}
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pending Change Orders</div>
+          <div class="kpi-value">{{ formatCurrency(kpis()!.pendingChangeOrdersAmount) }}</div>
+          <div class="kpi-change" [class]="kpis()!.pendingChangeOrdersAmount > 0 ? 'warning' : 'positive'">
+            <app-icon [name]="kpis()!.pendingChangeOrdersAmount > 0 ? 'file-plus' : 'check-circle'" [size]="14" />
+            {{ kpis()!.pendingChangeOrdersAmount > 0 ? kpis()!.openChangeOrders + ' pending review' : 'No pending COs' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-grid">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Upcoming Milestones</h2>
+              <p class="card-subtitle">Next 30 days</p>
+            </div>
+          </div>
+          <div class="grid-card">
+            <ejs-grid
+              [dataSource]="milestones()"
+              [allowResizing]="true"
+              width="100%"
+              gridLines="Horizontal"
+            >
+              <e-columns>
+                <e-column field="title" headerText="Milestone">
+                  <ng-template #template let-m>
+                    <span class="cell-truncate" [title]="m.title">{{ m.title }}</span>
+                  </ng-template>
+                </e-column>
+                <e-column field="plannedDate" headerText="Planned Date" width="120">
+                  <ng-template #template let-m>
+                    <span>{{ formatDate(m.plannedDate) }}</span>
+                  </ng-template>
+                </e-column>
+                <e-column field="status" headerText="Status" width="120">
+                  <ng-template #template let-m>
+                    <span class="badge {{ milestoneStatusBadge(m.status) }}">{{ milestoneStatusLabelFor(m.status) }}</span>
+                  </ng-template>
+                </e-column>
+                <e-column field="owner" headerText="Owner" width="160">
+                  <ng-template #template let-m>
+                    <span>{{ m.owner ?? '—' }}</span>
+                  </ng-template>
+                </e-column>
+              </e-columns>
+            </ejs-grid>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Risk Register</h2>
+              <p class="card-subtitle">Top open items</p>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (risks().length === 0) {
+              <div class="text-secondary" style="text-align: center">No open risks</div>
+            }
+            @for (r of risks(); track r.id) {
+              <div class="alert" [class]="riskAlertClassFor(r.severity)">
+                <app-icon [name]="r.severity === 'Critical' ? 'shield-alert' : 'alert-triangle'" [size]="16" />
+                <div>
+                  <div style="font-weight: 600">{{ r.title }}</div>
+                  <div style="font-size: var(--text-caption-size); opacity: 0.9">
+                    {{ r.impactDisplay }}{{ r.owner ? ' · Owner: ' + r.owner : '' }}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Document Workflow</h2>
+            <p class="card-subtitle">Last 30 days · {{ project()!.code }}</p>
+          </div>
+          <div class="toolbar-right">
+            <button type="button" class="btn btn-ghost btn-sm text-secondary" (click)="goTo('/documents')">
+              <app-icon name="file-text" [size]="14" /> View documents
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm text-secondary" (click)="goTo('/rfis')">
+              <app-icon name="message-square" [size]="14" /> View RFIs
+            </button>
+          </div>
+        </div>
+        <div class="grid-card document-table">
+          <ejs-grid
+            [dataSource]="documents()"
+            [allowResizing]="true"
+            width="100%"
+            gridLines="Horizontal"
+            (rowSelected)="onDocumentRowSelected($event)"
+          >
+            <e-columns>
+              <e-column field="title" headerText="Document">
+                <ng-template #template let-d>
+                  <span class="cell-truncate" [title]="d.title">{{ d.title }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="type" headerText="Type" width="130">
+                <ng-template #template let-d>
+                  <span>{{ d.type }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="revision" headerText="Revision" width="90">
+                <ng-template #template let-d>
+                  <span class="font-mono">{{ d.revision ?? '—' }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="submittedDate" headerText="Submitted" width="120">
+                <ng-template #template let-d>
+                  <span>{{ formatDate(d.submittedDate) }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="status" headerText="Status" width="130">
+                <ng-template #template let-d>
+                  <span class="badge {{ documentStatusClass(d.status) }}">{{ d.status }}</span>
+                </ng-template>
+              </e-column>
+            </e-columns>
+          </ejs-grid>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: var(--space-xl)">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Project Details</h2>
+            <p class="card-subtitle">General information</p>
+          </div>
+        </div>
+        <ul class="meta-list">
+          <li><span class="meta-label">Status</span><span class="badge" [class]="healthBadge(project()!.healthStatus)">{{ project()!.status }}</span></li>
+          <li><span class="meta-label">Health</span><span class="badge" [class]="healthBadge(project()!.healthStatus)">{{ splitHealthLabel(project()!.healthStatus) }}</span></li>
+          <li><span class="meta-label">Project Manager</span><span class="meta-value">{{ project()!.manager ?? '—' }}</span></li>
+          <li><span class="meta-label">Duration</span><span class="meta-value">{{ formatDate(project()!.startDate) }} – {{ formatDate(project()!.endDate) }}</span></li>
+          <li><span class="meta-label">Location</span><span class="meta-value">{{ project()!.location ?? '—' }}</span></li>
+          <li><span class="meta-label">Budget</span><span class="meta-value">{{ formatCurrency(project()!.budget) }}</span></li>
+        </ul>
+      </div>
+
+      <app-modal
+        [open]="!!previewDocument()"
+        [title]="previewDocument()?.title ?? ''"
+        [subtitle]="previewDocument() ? (previewDocument()!.type + ' · Rev ' + (previewDocument()!.revision ?? '—') + ' · Submitted ' + formatDate(previewDocument()!.submittedDate)) : undefined"
+        size="xl"
+        (closed)="previewDocument.set(null)"
+      >
+        @if (previewDocument(); as doc) {
+          <div class="modal-detail-grid">
+            <div class="modal-detail-item">
+              <span class="modal-detail-label">Document #</span>
+              <span class="modal-detail-value font-mono">{{ doc.documentNumber }}</span>
+            </div>
+            <div class="modal-detail-item">
+              <span class="modal-detail-label">Status</span>
+              <span class="badge" [class]="documentStatusClass(doc.status)" style="width: fit-content">{{ doc.status }}</span>
+            </div>
+          </div>
+          <div style="height: 620px; border-radius: var(--radius-md); overflow: hidden">
+            <ejs-pdfviewer id="project-document-pdf-viewer" [documentPath]="sampleUrl" resourceUrl="/ej2-pdfviewer-lib" style="height: 620px"></ejs-pdfviewer>
+          </div>
+        }
+      </app-modal>
+    }
+
+    @if (activeTab() === 'Schedule') {
+      <h2 class="section-title">Schedule</h2>
+      <p class="section-subtitle">Key milestones and planned dates for the project.</p>
+      <div class="grid-card" style="margin-top: var(--space-lg)">
+        <ejs-grid
+          [dataSource]="milestones()"
+          [allowResizing]="true"
+          width="100%"
+          gridLines="Horizontal"
+        >
+          <e-columns>
+            <e-column field="title" headerText="Milestone">
+              <ng-template #template let-m>
+                <span class="cell-bold cell-truncate" [title]="m.title">{{ m.title }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="description" headerText="Description">
+              <ng-template #template let-m>
+                <span class="text-secondary cell-truncate" [title]="m.description ?? ''">{{ m.description ?? '—' }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="plannedDate" headerText="Planned Date" width="130">
+              <ng-template #template let-m>
+                <span>{{ formatDate(m.plannedDate) }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="status" headerText="Status" width="130">
+              <ng-template #template let-m>
+                <span class="badge {{ milestoneStatusBadge(m.status) }}">{{ milestoneStatusLabelFor(m.status) }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="owner" headerText="Owner" width="160">
+              <ng-template #template let-m>
+                <span>{{ m.owner ?? '—' }}</span>
+              </ng-template>
+            </e-column>
+          </e-columns>
+        </ejs-grid>
+      </div>
+    }
+
+    @if (activeTab() === 'Cost') {
+      <h2 class="section-title">Cost Control</h2>
+      <p class="section-subtitle">Budget status, cost variance, and pending change orders.</p>
+      <div class="kpi-grid" style="margin-top: var(--space-lg)">
+        <div class="kpi-card">
+          <div class="kpi-label">Budget</div>
+          <div class="kpi-value">{{ formatCurrency(kpis()!.budget) }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Spent</div>
+          <div class="kpi-value">{{ formatCurrency(kpis()!.spent) }}</div>
+          <div class="progress-bar">
+            <div class="progress-fill" [class]="kpis()!.spent / kpis()!.budget > 0.9 ? 'is-error' : 'is-success'" [style.width.%]="spentPercent(kpis()!.spent, kpis()!.budget)"></div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Cost Variance</div>
+          <div class="kpi-value" [class]="kpis()!.costVariance >= 0 ? 'text-success' : 'text-error'">
+            {{ kpis()!.costVariance >= 0 ? '+' : '-' }}{{ formatCurrency(kpis()!.costVariance < 0 ? -kpis()!.costVariance : kpis()!.costVariance) }}
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pending Change Orders</div>
+          <div class="kpi-value">{{ formatCurrency(kpis()!.pendingChangeOrdersAmount) }}</div>
+          <div class="kpi-change" [class]="kpis()!.pendingChangeOrdersAmount > 0 ? 'warning' : 'positive'">{{ kpis()!.openChangeOrders }} open</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div><h2 class="card-title">Change Orders</h2><p class="card-subtitle">Pending and approved project changes</p></div>
+        </div>
+        <div class="grid-card">
+          <ejs-grid
+            [dataSource]="changeOrders()"
+            [allowResizing]="true"
+            width="100%"
+            gridLines="Horizontal"
+          >
+            <e-columns>
+              <e-column field="number" headerText="CO #" width="90">
+                <ng-template #template let-co>
+                  <span class="font-mono">{{ co.number }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="description" headerText="Description">
+                <ng-template #template let-co>
+                  <span class="cell-truncate" [title]="co.description">{{ co.description }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="amount" headerText="Amount" width="130">
+                <ng-template #template let-co>
+                  <span>{{ formatCurrency(co.amount) }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="status" headerText="Status" width="130">
+                <ng-template #template let-co>
+                  <span class="badge {{ changeOrderStatusClass(co.status) }}">{{ co.status }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="requestedBy" headerText="Requested By" width="160">
+                <ng-template #template let-co>
+                  <span>{{ co.requestedBy ?? '—' }}</span>
+                </ng-template>
+              </e-column>
+            </e-columns>
+          </ejs-grid>
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'RFIs') {
+      <div class="card">
+        <div class="card-header">
+          <div><h2 class="card-title">RFI Log</h2><p class="card-subtitle">Discipline, impact, and status</p></div>
+          <div class="toolbar-right">
+            <button type="button" class="btn btn-ghost btn-sm text-secondary" (click)="goTo('/rfis')">
+              <app-icon name="message-square" [size]="14" /> View all
+            </button>
+          </div>
+        </div>
+        <div class="grid-card">
+          <ejs-grid
+            [dataSource]="rfis()"
+            [allowResizing]="true"
+            width="100%"
+            gridLines="Horizontal"
+          >
+            <e-columns>
+              <e-column field="number" headerText="RFI #" width="90">
+                <ng-template #template let-r>
+                  <span class="font-mono">{{ r.number }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="subject" headerText="Subject">
+                <ng-template #template let-r>
+                  <span class="cell-truncate" [title]="r.subject">{{ r.subject }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="discipline" headerText="Discipline" width="120">
+                <ng-template #template let-r>
+                  <span>{{ r.discipline ?? '—' }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="impact" headerText="Impact" width="100">
+                <ng-template #template let-r>
+                  <span>{{ r.impact ?? '—' }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="status" headerText="Status" width="110">
+                <ng-template #template let-r>
+                  <span class="badge {{ rfiStatusClass(r.status) }}">{{ r.status }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="dueDate" headerText="Due" width="110">
+                <ng-template #template let-r>
+                  <span>{{ r.dueDate ? formatDate(r.dueDate) : '—' }}</span>
+                </ng-template>
+              </e-column>
+            </e-columns>
+          </ejs-grid>
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'Submittals') {
+      <h2 class="section-title">Submittals</h2>
+      <p class="section-subtitle">Material and shop drawing submittals by specification section.</p>
+      <div class="card grid-card" style="margin-top: var(--space-lg)">
+        <div class="card-header">
+          <div><h2 class="card-title">Submittal Register</h2><p class="card-subtitle">Type, specification section, and approval status</p></div>
+        </div>
+        <ejs-grid
+          [dataSource]="submittals()"
+          [allowResizing]="true"
+          width="100%"
+          gridLines="Horizontal"
+        >
+          <e-columns>
+            <e-column field="number" headerText="Sub #" width="90">
+              <ng-template #template let-s>
+                <span class="font-mono">{{ s.number }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="title" headerText="Title">
+              <ng-template #template let-s>
+                <span class="cell-truncate" [title]="s.title">{{ s.title }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="submittalType" headerText="Type" width="120">
+              <ng-template #template let-s>
+                <span>{{ s.submittalType ?? '—' }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="discipline" headerText="Discipline" width="120">
+              <ng-template #template let-s>
+                <span>{{ s.discipline ?? '—' }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="specificationSection" headerText="Spec Section" width="120">
+              <ng-template #template let-s>
+                <span>{{ s.specificationSection ?? '—' }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="status" headerText="Status" width="130">
+              <ng-template #template let-s>
+                <span class="badge {{ submittalStatusClass(s.status) }}">{{ s.status }}</span>
+              </ng-template>
+            </e-column>
+          </e-columns>
+        </ejs-grid>
+      </div>
+    }
+  }
+</div>

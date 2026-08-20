@@ -1,0 +1,239 @@
+<div class="dashboard-page">
+  <header class="page-header">
+    <h1>Dashboard</h1>
+    <p>Real-time project controls across the construction portfolio.</p>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state" aria-live="polite">Loading dashboard…</div>
+  }
+  @if (error()) {
+    <div class="alert alert-error" role="alert">{{ error() }}</div>
+  }
+
+  @if (!loading() && !error() && portfolio() && cost() && health()) {
+    <div class="kpi-grid">
+      @for (kpi of kpiSummary(); track kpi.label) {
+        <div
+          class="kpi-card"
+          [class.is-clickable]="!!kpi.to"
+          [attr.role]="kpi.to ? 'button' : null"
+          [attr.tabindex]="kpi.to ? 0 : null"
+          [attr.aria-label]="kpi.to ? 'View ' + kpi.label : null"
+          (click)="onKpiClick(kpi)"
+          (keydown)="onKpiKeydown($event, kpi)"
+        >
+          <div class="kpi-label">{{ kpi.label }}</div>
+          <div class="kpi-value">{{ kpi.value }}</div>
+          <div class="kpi-change" [class]="kpi.tone">
+            <app-icon [name]="kpi.icon" [size]="14" />
+            {{ kpi.trend }}
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="two-column-grid">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Cost Performance Trend</h2>
+            <p class="card-subtitle">Earned value vs. actual spend</p>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="goTo('/cost-control')">View report</button>
+        </div>
+        <div
+          class="dashboard-chart"
+          measuredWidth
+          #trendMw="measuredWidth"
+          role="img"
+          aria-label="Cost performance trend, planned versus actual by month"
+        >
+          @if (costTrendData().length === 0) {
+            <div class="empty-state" style="width: 100%">
+              <app-icon name="bar-chart-3" [size]="48" />
+              <p>No trend data available</p>
+            </div>
+          } @else {
+            <ejs-chart
+              id="dashboard-cost-trend"
+              class="dashboard-cost-trend"
+              [width]="trendMw.value() > 0 ? trendMw.value() + 'px' : '100%'"
+              height="208px"
+              background="transparent"
+              [border]="{ width: 0, color: 'transparent' }"
+              [chartArea]="{ border: { width: 0, color: 'transparent' } }"
+              [primaryXAxis]="{
+                valueType: 'Category',
+                interval: 1,
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                lineStyle: { color: chartPalette().axisLine, width: 1 },
+                labelStyle: {
+                  color: chartPalette().axisLabel,
+                  fontFamily: 'var(--font-sans)',
+                  size: 'var(--text-caption-size)',
+                  fontWeight: '500',
+                }
+              }"
+              [primaryYAxis]="{
+                visible: false,
+                majorGridLines: { width: 0 },
+                lineStyle: { width: 0 },
+                majorTickLines: { width: 0 }
+              }"
+              [tooltip]="{
+                enable: true,
+                shared: true,
+                fill: chartPalette().tooltipBg,
+                border: { width: 0 },
+                textStyle: { color: chartPalette().tooltipText, fontFamily: 'var(--font-sans)', size: '12px' }
+              }"
+              [legendSettings]="{ visible: false }"
+              [margin]="{ top: 6, right: 4, bottom: 2, left: 4 }"
+              [palettes]="[chartPalette().planned, chartPalette().actual]"
+            >
+              <e-series-collection>
+                <e-series
+                  [dataSource]="costTrendData()"
+                  xName="x"
+                  yName="planned"
+                  name="Planned"
+                  type="Column"
+                  [columnWidth]="0.4"
+                  [columnSpacing]="0.06"
+                  [cornerRadius]="{ topLeft: 2, topRight: 2 }"
+                ></e-series>
+                <e-series
+                  [dataSource]="costTrendData()"
+                  xName="x"
+                  yName="actual"
+                  name="Actual"
+                  type="Column"
+                  [columnWidth]="0.4"
+                  [columnSpacing]="0.06"
+                  [cornerRadius]="{ topLeft: 2, topRight: 2 }"
+                ></e-series>
+              </e-series-collection>
+            </ejs-chart>
+          }
+        </div>
+        <div class="chart-legend">
+          <span><span class="legend-swatch" [style.background]="chartPalette().planned" aria-hidden="true"></span>Planned</span>
+          <span><span class="legend-swatch" [style.background]="chartPalette().actual" aria-hidden="true"></span>Actual</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Projects by Health</h2>
+            <p class="card-subtitle">Risk-weighted health distribution</p>
+          </div>
+        </div>
+        <div class="health-chart" style="display: flex; align-items: center; gap: var(--space-xl)">
+          <div
+            class="health-chart-donut"
+            role="img"
+            [attr.aria-label]="'Project health distribution: ' + healthCounts().onTrack + ' on track, ' + healthCounts().atRisk + ' at risk, ' + healthCounts().critical + ' critical, ' + healthCounts().notStarted + ' not started'"
+          >
+            @if (healthDonutData().length === 0) {
+              <div class="empty-state"><p>No projects yet</p></div>
+            } @else {
+              <ejs-accumulationchart
+                id="dashboard-health-donut"
+                class="dashboard-health-donut"
+                width="140px"
+                height="140px"
+                background="transparent"
+                [center]="{ x: '50%', y: '50%' }"
+                [legendSettings]="{ visible: false }"
+                [enableSmartLabels]="false"
+                [margin]="{ top: 0, right: 0, bottom: 0, left: 0 }"
+              >
+                <e-accumulation-series-collection>
+                  <e-accumulation-series
+                    [dataSource]="healthDonutData()"
+                    xName="x"
+                    yName="y"
+                    pointColorMapping="color"
+                    innerRadius="56%"
+                    radius="100%"
+                    [startAngle]="0"
+                    [endAngle]="360"
+                    [dataLabel]="{ visible: false }"
+                  ></e-accumulation-series>
+                </e-accumulation-series-collection>
+              </ejs-accumulationchart>
+              <div class="donut-hole">
+                <span>{{ healthCounts().total }}</span>
+                <small>Projects</small>
+              </div>
+            }
+          </div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-sm)">
+            <div class="kpi-change" [class]="healthClasses.OnTrack">
+              <span class="status-dot success" aria-hidden="true"></span> {{ healthCounts().onTrack }} On track
+            </div>
+            <div class="kpi-change" [class]="healthClasses.AtRisk">
+              <span class="status-dot warning" aria-hidden="true"></span> {{ healthCounts().atRisk }} At risk
+            </div>
+            <div class="kpi-change" [class]="healthClasses.Critical">
+              <span class="status-dot error" aria-hidden="true"></span> {{ healthCounts().critical }} Critical
+            </div>
+            <div class="kpi-change" [class]="healthClasses.NotStarted">
+              <span class="status-dot" aria-hidden="true"></span> {{ healthCounts().notStarted }} Not started
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: var(--space-xl)">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Schedule at a Glance</h2>
+          <p class="card-subtitle">Next 14 days across the portfolio</p>
+        </div>
+      </div>
+      <div class="grid-card">
+        <ejs-grid
+          [dataSource]="milestones()"
+          [allowResizing]="true"
+          width="100%"
+          gridLines="Horizontal"
+        >
+          <e-columns>
+            <e-column field="projectCode" headerText="Project" width="140">
+              <ng-template #template let-m>
+                <span class="font-mono">{{ m.projectCode }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="title" headerText="Milestone">
+              <ng-template #template let-m>
+                <span class="cell-clamp-2">{{ m.title }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="dueDate" headerText="Due Date" width="130">
+              <ng-template #template let-m>
+                <span>{{ formatDate(m.dueDate) }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="owner" headerText="Owner" width="180">
+              <ng-template #template let-m>
+                <span>{{ m.owner ?? '—' }}</span>
+              </ng-template>
+            </e-column>
+            <e-column field="healthStatus" headerText="Status" width="130">
+              <ng-template #template let-m>
+                <span class="badge {{ healthBadge(m.healthStatus) }}">
+                  {{ splitHealthLabel(m.healthStatus) }}
+                </span>
+              </ng-template>
+            </e-column>
+          </e-columns>
+        </ejs-grid>
+      </div>
+    </div>
+  }
+</div>

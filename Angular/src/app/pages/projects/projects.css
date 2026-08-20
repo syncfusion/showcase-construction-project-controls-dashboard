@@ -1,0 +1,138 @@
+.projects-page .page-header {
+  margin-bottom: var(--space-xl);
+}
+
+.projects-page .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+.projects-page .toolbar-left,
+.projects-page .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.projects-page .input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.projects-page .input-with-icon .icon-search {
+  position: absolute;
+  left: 12px;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.projects-page .input-with-icon .input,
+.projects-page .select {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-primary);
+  font-size: var(--text-small-size);
+  line-height: 1;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.projects-page .input-with-icon .input {
+  padding-left: 36px;
+  min-width: 240px;
+}
+
+.projects-page .input-with-icon .input:focus,
+.projects-page .select:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus-ring);
+}
+
+.projects-page .input-with-icon .input::placeholder {
+  color: var(--color-muted);
+}
+
+.projects-page .select {
+  min-width: 160px;
+  appearance: auto;
+}
+
+/* ── Syncfusion Grid (Phase 3) parity ────────────────────────────
+   Strip ej2 default chrome with (0,2,0) specificity, render inside
+   a `.grid-card` wrapper that replaces the old `.table-container`. */
+.projects-page .grid-card {
+  border: var(--table-border);
+  border-radius: var(--card-radius);
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.projects-page .grid-card .e-grid {
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.projects-page .grid-card .e-gridheader,
+.projects-page .grid-card .e-headercell {
+  background: var(--color-surface) !important;
+  color: var(--color-secondary) !important;
+  font-weight: 600 !important;
+  font-size: var(--text-caption-size) !important;
+  border-color: var(--color-border) !important;
+}
+
+.projects-page .grid-card .e-rowcell,
+.projects-page .grid-card .e-content,
+.projects-page .grid-card .e-table {
+  background: var(--color-background) !important;
+  color: var(--color-primary) !important;
+  font-size: var(--text-small-size) !important;
+  border-color: var(--color-border) !important;
+}
+
+.projects-page .grid-card .e-row {
+  cursor: pointer;
+}
+
+.projects-page .grid-card .e-row:hover .e-rowcell {
+  background: var(--table-row-bg-hover) !important;
+}
+
+/* Per-cell helpers mirroring React's inline `style={{...}}` */
+.projects-page .grid-card .cell-clamp-2 {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.projects-page .grid-card .progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 130px;
+}
+
+.projects-page .grid-card .progress-cell .progress-bar {
+  max-width: 130px;
+  margin-bottom: 0;
+}
+
+.projects-page .grid-card .progress-cell .progress-label {
+  font-size: var(--text-caption-size);
+}
+
+.projects-page .grid-card .e-grid .badge {
+  font-size: var(--text-caption-size);
+  padding: 2px 8px;
+}

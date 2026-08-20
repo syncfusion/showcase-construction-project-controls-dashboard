@@ -1,0 +1,251 @@
+/* Shell layout — ports the design system shared/layout.css and wraps the app */
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--topbar-height) 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  grid-row: 1 / -1;
+  background: var(--sidebar-bg);
+  border-right: var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  height: var(--topbar-height);
+  padding: 0 var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 700;
+  font-size: var(--text-h4-size);
+  color: var(--color-primary);
+}
+
+.sidebar-brand .icon,
+.sidebar-brand app-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-md) var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nav-section-title {
+  padding: var(--space-md) var(--space-md) var(--space-xs);
+  font-size: var(--text-caption-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 10px var(--space-md);
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--sidebar-text);
+  font-size: var(--text-small-size);
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.nav-item:hover {
+  background: var(--sidebar-item-hover);
+  text-decoration: none;
+}
+
+.nav-item:hover app-icon {
+  text-decoration: none;
+}
+
+.nav-item.is-active {
+  background: var(--sidebar-item-active-bg);
+  border-left-color: var(--sidebar-item-active-border);
+  color: var(--sidebar-active-text);
+}
+
+.topbar {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 0 var(--space-xl);
+  background: var(--topbar-bg);
+  border-bottom: var(--topbar-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Hamburger menu toggle. Hidden by default because the sidebar is always
+   visible on desktop and tablet widths. Specificity (.topbar .menu-toggle,
+   0,2,0) intentionally exceeds .btn's single-class rule (0,1,0) in
+   global.css so the display:none wins regardless of CSS load order. */
+.topbar .menu-toggle {
+  display: none;
+}
+
+/* Topbar page-title slot (page-meta fallback when no custom heading template
+   is set by the active page). Mirrors React's `.topbar-page-title` block in
+   Construction.React/src/layout/Shell.css. */
+.topbar-page-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topbar-page-title-heading {
+  margin: 0;
+  font-size: var(--text-h4-size);
+  font-weight: var(--text-h4-weight);
+  letter-spacing: var(--text-h4-track);
+  color: var(--color-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-page-title-subtitle {
+  margin: 0;
+  font-size: var(--text-caption-size);
+  color: var(--color-secondary);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Project-detail breadcrumb (custom heading template, e.g. "Projects /
+   PRJ-0001" with a back button). Mirrors React's .topbar-breadcrumb block. */
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-small-size);
+  color: var(--color-secondary);
+  min-width: 0;
+}
+.topbar-breadcrumb app-icon {
+  color: var(--color-accent);
+}
+.topbar-breadcrumb .font-mono {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.main-content {
+  grid-column: 2;
+  grid-row: 2;
+  padding: var(--space-xl);
+  overflow-y: auto;
+  background: var(--color-background);
+}
+
+.sidebar-overlay {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 1023px) {
+  .app-shell {
+    grid-template-columns: 72px 1fr;
+  }
+  .sidebar-brand span,
+  .nav-item span {
+    display: none;
+  }
+  .nav-item {
+    justify-content: center;
+    padding: 12px;
+  }
+  .nav-list {
+    padding: var(--space-md) var(--space-sm);
+  }
+}
+
+@media (max-width: 767px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(280px, 80vw);
+    transform: translateX(-100%);
+    z-index: 20;
+    transition: transform 0.2s ease;
+  }
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+  .sidebar.is-open .sidebar-brand span,
+  .sidebar.is-open .nav-item span {
+    display: inline;
+  }
+  .sidebar.is-open .nav-item {
+    justify-content: flex-start;
+    padding: 10px var(--space-md);
+  }
+  .topbar {
+    grid-column: 1;
+  }
+  .main-content {
+    grid-column: 1;
+  }
+  .topbar .menu-toggle {
+    display: inline-flex;
+  }
+  /* When the mobile drawer is open, the dimmed overlay (sidebar-overlay)
+     covers the page and acts as the close affordance. Hide the hamburger
+     so the toolbar reads cleanly while the sidebar is showing. The same
+     specificity (.sidebar.is-open ~ .topbar .menu-toggle, 0,3,0) exceeds
+     the show rule above (0,2,0) and wins by source order + specificity. */
+  .sidebar.is-open ~ .topbar .menu-toggle {
+    display: none;
+  }
+  .sidebar-overlay.is-visible {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 15;
+  }
+}

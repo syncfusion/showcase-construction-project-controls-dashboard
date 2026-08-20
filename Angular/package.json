@@ -1,0 +1,44 @@
+{
+  "name": "construction-angular",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "start:prod": "ng serve --configuration production",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "packageManager": "npm@11.17.0",
+  "dependencies": {
+    "@angular/animations": "22.0.7",
+    "@angular/common": "22.0.7",
+    "@angular/compiler": "22.0.7",
+    "@angular/core": "22.0.7",
+    "@angular/forms": "22.0.7",
+    "@angular/platform-browser": "22.0.7",
+    "@angular/router": "22.0.7",
+    "@syncfusion/ej2-angular-charts": "^34.1.29",
+    "@syncfusion/ej2-angular-diagrams": "^34.1.29",
+    "@syncfusion/ej2-angular-grids": "^34.1.29",
+    "@syncfusion/ej2-angular-heatmap": "^34.1.29",
+    "@syncfusion/ej2-angular-maps": "^34.1.29",
+    "@syncfusion/ej2-angular-pdfviewer": "^34.1.29",
+    "@syncfusion/ej2-angular-schedule": "^34.1.29",
+    "@syncfusion/ej2-base": "^34.1.29",
+    "@syncfusion/ej2-material-theme": "^34.1.29",
+    "@lucide/angular": "^1.25.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.0.7",
+    "@angular/cli": "^22.0.7",
+    "@angular/compiler-cli": "^22.0.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~6.0.2",
+    "vitest": "^4.0.8"
+  }
+}

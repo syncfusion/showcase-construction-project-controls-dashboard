@@ -1,18 +1,63 @@
-# Node / frontend (each app's own .gitignore covers its dist/.vite/.angular build output)
+# ----------------------------------------------------------------------------
+# Node / frontend (Angular + React live at the repo root)
+# ----------------------------------------------------------------------------
 node_modules/
 
-# .NET build outputs
+# Angular build output and cache
+Angular/.angular/
+Angular/dist/
+Angular/coverage/
+Angular/.angular-cache/
+
+# React (Vite) build output and cache
+React/dist/
+React/dist-ssr/
+React/.vite/
+React/coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment / local config
+.env
+.env.local
+.env.*.local
+
+# ----------------------------------------------------------------------------
+# .NET / WebAPI
+# ----------------------------------------------------------------------------
 **/bin/
 **/obj/
 **/publish/
+**/*.user
+**/*.suo
+*.user
 *.csproj.user
 
+# EF Core / dotnet user-secrets files
+**/secrets.json
+
+# ----------------------------------------------------------------------------
 # IDE / OS
+# ----------------------------------------------------------------------------
 .vs/
 .vscode/
+.idea/
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
+desktop.ini
 
-
-# APM dependencies
+# ----------------------------------------------------------------------------
+# Other
+# ----------------------------------------------------------------------------
 apm_modules/
+*.tmp
+*.bak

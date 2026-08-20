@@ -1,0 +1,179 @@
+.cost-control-page {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.cost-control-page .earned-value-legend {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  font-size: var(--text-caption-size);
+  color: var(--color-secondary);
+}
+
+.cost-control-page .earned-value-legend .legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+
+.cost-control-page .cost-heatmap-wrap {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Syncfusion HeatMap: hide white background rect so the card surface
+   shows through; lock the per-cell font to the project font token. */
+.cost-control-page .cost-heatmap-wrap .e-heatmap #cost-variance-heatmap_HeatmapBorder {
+  fill: transparent;
+}
+
+.cost-control-page .dashboard-chart {
+  width: 100%;
+  min-height: 208px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cost-control-page .dashboard-chart > .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 208px;
+  color: var(--color-muted);
+  gap: var(--space-sm);
+}
+
+.cost-control-page .change-order-card {
+  margin-top: var(--space-xl);
+}
+
+/* ── Syncfusion Grid (Phase 6) parity overrides ───────────────── */
+.cost-control-page .grid-card {
+  border: var(--table-border);
+  border-radius: var(--card-radius);
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.cost-control-page .grid-card .e-grid {
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.cost-control-page .grid-card .e-gridheader,
+.cost-control-page .grid-card .e-headercell {
+  background: var(--color-surface) !important;
+  color: var(--color-secondary) !important;
+  font-weight: 600 !important;
+  font-size: var(--text-caption-size) !important;
+  border-color: var(--color-border) !important;
+}
+
+.cost-control-page .grid-card .e-rowcell,
+.cost-control-page .grid-card .e-content,
+.cost-control-page .grid-card .e-table {
+  background: var(--color-background) !important;
+  color: var(--color-primary) !important;
+  font-size: var(--text-small-size) !important;
+  border-color: var(--color-border) !important;
+}
+
+.cost-control-page .grid-card .e-row {
+  cursor: pointer;
+}
+
+.cost-control-page .grid-card .e-row:hover .e-rowcell {
+  background: var(--table-row-bg-hover) !important;
+}
+
+.cost-control-page .grid-card .cell-clamp-2 {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.cost-control-page .grid-card .cell-wrap {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.cost-control-page .grid-card .cell-bold {
+  font-weight: 600;
+}
+
+.cost-control-page .grid-card .e-grid .badge {
+  font-size: var(--text-caption-size);
+  padding: 2px 8px;
+}
+
+/* Change order filter toolbar (mirrors .projects-page .toolbar) */
+.cost-control-page .co-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin: 0 0 var(--space-lg) 0;
+  flex-wrap: wrap;
+}
+
+.cost-control-page .co-toolbar .toolbar-left,
+.cost-control-page .co-toolbar .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.cost-control-page .co-toolbar .input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .icon-search {
+  position: absolute;
+  left: 12px;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input,
+.cost-control-page .co-toolbar .select {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-background);
+  color: var(--color-primary);
+  font-size: var(--text-small-size);
+  line-height: 1;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input {
+  padding-left: 36px;
+  min-width: 240px;
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input:focus,
+.cost-control-page .co-toolbar .select:focus {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-focus-ring);
+}
+
+.cost-control-page .co-toolbar .input-with-icon .input::placeholder {
+  color: var(--color-muted);
+}
+
+.cost-control-page .co-toolbar .select {
+  min-width: 160px;
+  appearance: auto;
+}

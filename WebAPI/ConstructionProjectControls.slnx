@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Construction.Api/Construction.Api.csproj" />
+  <Project Path="Construction.Core/Construction.Core.csproj" />
+  <Project Path="Construction.Infrastructure/Construction.Infrastructure.csproj" />
+  <Project Path="Construction.Tests/Construction.Tests.csproj" />
+</Solution>

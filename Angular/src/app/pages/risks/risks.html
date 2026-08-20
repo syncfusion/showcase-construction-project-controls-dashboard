@@ -1,0 +1,266 @@
+<div class="risks-page">
+  <header class="page-header">
+    <h1>Risks &amp; Issues</h1>
+    <p>Track, score, and mitigate project risks before they impact cost or schedule.</p>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state" aria-live="polite">Loading risks…</div>
+  }
+  @if (error()) {
+    <div class="alert alert-error" role="alert">{{ error() }}</div>
+  }
+
+  @if (!loading() && !error()) {
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="input-with-icon">
+          <app-icon name="search" [size]="16" />
+          <input type="search" class="input" placeholder="Search risks…" [value]="search()" (input)="onSearchChange($any($event.target).value)" />
+        </div>
+        <select class="select" [value]="severity()" (change)="onSeverityChange($any($event.target).value)">
+          @for (s of severityOptions; track s) { <option [value]="s">{{ s }}</option> }
+        </select>
+        <select class="select" [value]="status()" (change)="onStatusChange($any($event.target).value)">
+          @for (s of statusOptions; track s) { <option [value]="s">{{ s }}</option> }
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="handleExportRisks()" [disabled]="filteredRisks().length === 0">
+          <app-icon name="download" [size]="14" />Export
+        </button>
+        <button type="button" class="btn btn-primary" (click)="openNewRiskModal()">
+          <app-icon name="plus" [size]="14" />New Risk
+        </button>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="margin-bottom: var(--space-xl)">
+      @for (kpi of kpiSummary(); track kpi.key) {
+        <div
+          class="kpi-card is-clickable"
+          [style.border-left]="'4px solid ' + kpiBorderColorFor(kpi.key)"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="'Filter risk register by ' + kpi.label"
+          (click)="applyKpiFilter(kpi.key)"
+          (keydown)="onKpiKeydown($event, kpi.key)"
+        >
+          <div class="kpi-label">{{ kpi.label }}</div>
+          <div class="kpi-value" [class]="kpi.key === 'critical' ? 'text-error' : kpi.key === 'mitigated' ? 'positive' : ''">{{ kpi.value }}</div>
+          <div class="kpi-change" [class]="kpiChangeToneFor(kpi.key)">
+            <app-icon [name]="kpiIconFor(kpi.key)" [size]="14" />{{ kpiChangeLabelFor(kpi.key) }}
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="card grid-card">
+      <div class="card-header">
+        <div><h2 class="card-title">Risk Register</h2><p class="card-subtitle">Open items across portfolio</p></div>
+      </div>
+      <ejs-grid
+        [dataSource]="filteredRisks()"
+        [allowPaging]="true"
+        [allowSorting]="true"
+        [pageSettings]="{ pageSize: 20, pageCount: 4 }"
+        gridLines="Horizontal"
+        (rowSelected)="onRowSelected($event)"
+      >
+        <e-columns>
+          <e-column field="number" headerText="ID" width="80">
+            <ng-template #template let-r>
+              <span class="font-mono">{{ r.number }}</span>
+            </ng-template>
+          </e-column>
+          <e-column field="title" headerText="Risk / Issue">
+            <ng-template #template let-r>
+              <span class="cell-bold cell-wrap">{{ r.title }}</span>
+            </ng-template>
+          </e-column>
+          <e-column field="severity" headerText="Severity" width="110">
+            <ng-template #template let-r>
+              <span class="badge {{ severityBadge(r.severity) }}">{{ r.severity }}</span>
+            </ng-template>
+          </e-column>
+          <e-column field="probability" headerText="Probability" width="110">
+            <ng-template #template let-r>
+              <span>{{ r.probability }}</span>
+            </ng-template>
+          </e-column>
+          <e-column field="impactDisplay" headerText="Impact" width="100">
+            <ng-template #template let-r>
+              <span>{{ formatImpact(r) }}</span>
+            </ng-template>
+          </e-column>
+          <e-column field="owner" headerText="Owner" width="150">
+            <ng-template #template let-r>
+              <span>{{ r.owner || '—' }}</span>
+            </ng-template>
+          </e-column>
+          <e-column field="status" headerText="Mitigation Status" width="150">
+            <ng-template #template let-r>
+              <span class="badge {{ statusBadge(r.status) }}">{{ r.status }}</span>
+            </ng-template>
+          </e-column>
+        </e-columns>
+      </ejs-grid>
+    </div>
+
+    <div class="card risk-matrix-card">
+      <div class="card-header">
+        <div><h2 class="card-title">Risk Matrix</h2><p class="card-subtitle">Probability × Impact</p></div>
+      </div>
+      <app-risk-matrix-heatmap
+        [matrix]="matrix()"
+        (cellClick)="handleMatrixCellClick($event)"
+      ></app-risk-matrix-heatmap>
+    </div>
+  }
+
+  <app-modal
+    [open]="!!selectedRisk()"
+    [title]="selectedRisk()?.title ?? ''"
+    [subtitle]="selectedRisk() ? selectedRisk()!.number + ' · ' + selectedRisk()!.projectCode : undefined"
+    size="lg"
+    [hasFooter]="true"
+    (closed)="selectedRisk.set(null)"
+  >
+    @if (selectedRisk(); as risk) {
+      <div class="modal-detail-grid">
+        <div class="modal-detail-item"><span class="modal-detail-label">Severity</span><span class="badge" [class]="severityBadge(risk.severity)" style="width: fit-content">{{ risk.severity }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Status</span><span class="badge" [class]="statusBadge(risk.status)" style="width: fit-content">{{ risk.status }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Probability</span><span class="modal-detail-value">{{ risk.probability }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Impact</span><span class="modal-detail-value">{{ formatImpact(risk) }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Owner</span><span class="modal-detail-value">{{ risk.owner || '—' }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Identified</span><span class="modal-detail-value">{{ formatDate(risk.identifiedDate) }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Target Resolution</span><span class="modal-detail-value">{{ risk.targetResolutionDate ? formatDate(risk.targetResolutionDate) : '—' }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Closed</span><span class="modal-detail-value">{{ risk.closedDate ? formatDate(risk.closedDate) : '—' }}</span></div>
+        @if (risk.description) {
+          <div class="modal-detail-item is-span-2"><span class="modal-detail-label">Description</span><span class="modal-detail-value" style="font-weight: 400">{{ risk.description }}</span></div>
+        }
+        @if (risk.mitigationPlan) {
+          <div class="modal-detail-item is-span-2"><span class="modal-detail-label">Mitigation Plan</span><span class="modal-detail-value" style="font-weight: 400">{{ risk.mitigationPlan }}</span></div>
+        }
+      </div>
+    }
+    <div modal-footer>
+      <button type="button" class="btn btn-secondary" (click)="selectedRisk.set(null)">Close</button>
+      <button type="button" class="btn btn-primary" (click)="viewProjectDetails()">
+        <app-icon name="external-link" [size]="14" />View Project Details
+      </button>
+    </div>
+  </app-modal>
+
+  <!-- ── HeatMap cell drill modal ───────────────────────────── -->
+  <app-modal
+    [open]="matrixCellRisks().length > 0"
+    title="Risks in this cell"
+    [subtitle]="matrixCellLabel()"
+    size="lg"
+    [hasFooter]="true"
+    (closed)="matrixCellRisks.set([])"
+  >
+    <div class="cell-drill-list">
+      @for (r of matrixCellRisks(); track r.id) {
+        <div
+          class="card cell-drill-card"
+          role="button"
+          tabindex="0"
+          (click)="openRiskFromCellDrill(r)"
+          (keydown)="onCellDrillKeydown($event, r)"
+        >
+          <div class="cell-drill-card-header">
+            <div>
+              <span class="font-mono cell-drill-number">{{ r.number }}</span>
+              <p class="cell-drill-title">{{ r.title }}</p>
+              <span class="cell-drill-meta">{{ r.projectCode }} · {{ r.owner || 'Unassigned' }}</span>
+            </div>
+            <div class="cell-drill-badges">
+              <span class="badge {{ severityBadge(r.severity) }}">{{ r.severity }}</span>
+              <span class="badge {{ statusBadge(r.status) }}">{{ r.status }}</span>
+            </div>
+          </div>
+          <div class="cell-drill-footer">
+            <span class="cell-drill-impact">Impact: {{ formatImpact(r) }}</span>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              (click)="viewProjectForRisk(r)"
+            >
+              <app-icon name="external-link" [size]="14" />View Project
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+    <div modal-footer>
+      <button type="button" class="btn btn-secondary" (click)="matrixCellRisks.set([])">Close</button>
+    </div>
+  </app-modal>
+
+
+  <app-modal
+    [open]="showNewRiskModal()"
+    title="New Risk"
+    subtitle="Demo template — saved to this view only; nothing is sent to the backend."
+    size="lg"
+    [hasFooter]="true"
+    (closed)="showNewRiskModal.set(false)"
+  >
+    <div class="modal-form-grid">
+      <div class="modal-form-field is-span-2">
+        <label for="risk-title">Title</label>
+        <input id="risk-title" class="input" type="text" [value]="newRiskDraft().title" (input)="updateDraft({ title: $any($event.target).value })" required />
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-project-id">Project ID</label>
+        <input id="risk-project-id" class="input" type="number" [value]="newRiskDraft().projectId" (input)="updateDraft({ projectId: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-project-code">Project Code</label>
+        <input id="risk-project-code" class="input" type="text" [value]="newRiskDraft().projectCode" (input)="updateDraft({ projectCode: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-severity">Severity</label>
+        <select id="risk-severity" class="select" [value]="newRiskDraft().severity" (change)="updateDraft({ severity: $any($event.target).value })">
+          @for (s of severities; track s) { <option [value]="s">{{ s }}</option> }
+        </select>
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-probability">Probability</label>
+        <select id="risk-probability" class="select" [value]="newRiskDraft().probability" (change)="updateDraft({ probability: $any($event.target).value })">
+          @for (p of probabilities; track p) { <option [value]="p">{{ p }}</option> }
+        </select>
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-owner">Owner</label>
+        <input id="risk-owner" class="input" type="text" [value]="newRiskDraft().owner" (input)="updateDraft({ owner: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-target-date">Target Resolution</label>
+        <input id="risk-target-date" class="input" type="date" [value]="newRiskDraft().targetResolutionDate" (input)="updateDraft({ targetResolutionDate: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-impact-days">Schedule Impact (days)</label>
+        <input id="risk-impact-days" class="input" type="number" [value]="newRiskDraft().impactDays" (input)="updateDraft({ impactDays: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="risk-impact-cost">Cost Impact ($)</label>
+        <input id="risk-impact-cost" class="input" type="number" [value]="newRiskDraft().impactCost" (input)="updateDraft({ impactCost: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field is-span-2">
+        <label for="risk-description">Description</label>
+        <textarea id="risk-description" class="input" rows="2" [value]="newRiskDraft().description" (input)="updateDraft({ description: $any($event.target).value })"></textarea>
+      </div>
+      <div class="modal-form-field is-span-2">
+        <label for="risk-mitigation">Mitigation Plan</label>
+        <textarea id="risk-mitigation" class="input" rows="3" [value]="newRiskDraft().mitigationPlan" (input)="updateDraft({ mitigationPlan: $any($event.target).value })"></textarea>
+      </div>
+    </div>
+    <div modal-footer>
+      <button type="button" class="btn btn-secondary" (click)="showNewRiskModal.set(false)">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="handleSaveNewRisk()" [disabled]="!newRiskDraft().title.trim()">Save Risk</button>
+    </div>
+  </app-modal>
+</div>

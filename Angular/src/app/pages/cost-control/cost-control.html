@@ -1,0 +1,307 @@
+<div class="cost-control-page">
+  <header class="page-header">
+    <h1>Cost Control</h1>
+    <p>Track budgets, committed spend, forecasts, and change orders.</p>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state" aria-live="polite">Loading cost control…</div>
+  }
+  @if (error()) {
+    <div class="alert alert-error" role="alert">{{ error() }}</div>
+  }
+
+  @if (!loading() && !error() && kpis(); as kpisValue) {
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Portfolio Budget</div>
+        <div class="kpi-value">{{ formatCompactCurrency(kpisValue.totalPortfolioBudget) }}</div>
+        <div class="kpi-change text-secondary"><app-icon name="wallet" [size]="18" />24 projects</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Committed Spend</div>
+        <div class="kpi-value">{{ formatCompactCurrency(kpisValue.committedSpend) }}</div>
+        <div class="kpi-change text-secondary"><app-icon name="receipt" [size]="18" />{{ pctOfBudget(kpisValue.committedSpend, kpisValue.totalPortfolioBudget) }}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Forecast at Completion</div>
+        <div class="kpi-value">{{ formatCompactCurrency(kpisValue.forecastAtCompletion) }}</div>
+        <div class="kpi-change" [class]="(budgetDelta() ?? 0) >= 0 ? 'positive' : 'negative'">
+          <app-icon [name]="(budgetDelta() ?? 0) >= 0 ? 'arrow-up-right' : 'arrow-down-right'" [size]="14" />
+          {{ formatCompactCurrency((budgetDelta() ?? 0) < 0 ? -(budgetDelta() ?? 0) : (budgetDelta() ?? 0)) }} {{ (budgetDelta() ?? 0) >= 0 ? 'under budget' : 'over budget' }}
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Pending Change Orders</div>
+        <div class="kpi-value">{{ formatCompactCurrency(kpisValue.pendingChangeOrdersAmount) }}</div>
+        <div class="kpi-change negative"><app-icon name="file-warning" [size]="18" />{{ kpisValue.pendingChangeOrdersCount }} pending</div>
+      </div>
+    </div>
+
+    <div class="two-column-grid">
+      <div class="card">
+        <div class="card-header">
+          <div><h2 class="card-title">Earned Value Summary</h2><p class="card-subtitle">Year to date</p></div>
+        </div>
+        <div
+          class="dashboard-chart"
+          measuredWidth
+          #evMw="measuredWidth"
+          role="img"
+          aria-label="Earned value: planned versus actual cost by month"
+        >
+          @if (trendSeriesData().length === 0) {
+            <div class="empty-state" style="width: 100%">
+              <app-icon name="bar-chart-3" [size]="48" />
+              <p>No trend data available</p>
+            </div>
+          } @else {
+            <ejs-chart
+              id="cost-control-earned-value"
+              class="dashboard-cost-trend"
+              [width]="evMw.value() > 0 ? evMw.value() + 'px' : '100%'"
+              height="208px"
+              background="transparent"
+              [border]="{ width: 0, color: 'transparent' }"
+              [chartArea]="{ border: { width: 0, color: 'transparent' } }"
+              [primaryXAxis]="{
+                valueType: 'Category',
+                interval: 1,
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                lineStyle: { color: chartPalette().axisLine, width: 1 },
+                labelStyle: {
+                  color: chartPalette().axisLabel,
+                  fontFamily: chartPalette().fontFamily,
+                  size: chartPalette().captionSize,
+                  fontWeight: '500'
+                }
+              }"
+              [primaryYAxis]="{
+                visible: false,
+                majorGridLines: { width: 0 },
+                lineStyle: { width: 0 },
+                majorTickLines: { width: 0 }
+              }"
+              [tooltip]="{
+                enable: true,
+                shared: true,
+                fill: chartPalette().tooltipBg,
+                border: { width: 0 },
+                opacity: 1,
+                textStyle: { color: chartPalette().tooltipText, fontFamily: chartPalette().fontFamily, size: '12px' }
+              }"
+              [legendSettings]="{ visible: false }"
+              [margin]="{ top: 6, right: 4, bottom: 2, left: 4 }"
+              [palettes]="[chartPalette().planned, chartPalette().actual]"
+            >
+              <e-series-collection>
+                <e-series
+                  [dataSource]="trendSeriesData()"
+                  xName="x"
+                  yName="planned"
+                  name="BCWS (Planned)"
+                  type="Column"
+                  [columnWidth]="0.4"
+                  [columnSpacing]="0.06"
+                  [cornerRadius]="{ topLeft: 2, topRight: 2 }"
+                ></e-series>
+                <e-series
+                  [dataSource]="trendSeriesData()"
+                  xName="x"
+                  yName="actual"
+                  name="ACWP (Actual)"
+                  type="Column"
+                  [columnWidth]="0.4"
+                  [columnSpacing]="0.06"
+                  [cornerRadius]="{ topLeft: 2, topRight: 2 }"
+                ></e-series>
+              </e-series-collection>
+            </ejs-chart>
+          }
+        </div>
+        <div class="earned-value-legend">
+          <span><span class="legend-swatch" [style.background]="chartPalette().planned" aria-hidden="true"></span>BCWS</span>
+          <span><span class="legend-swatch" [style.background]="chartPalette().actual" aria-hidden="true"></span>ACWP</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div><h2 class="card-title">Cost Variance Heatmap</h2><p class="card-subtitle">By cost code</p></div>
+        </div>
+        <div class="cost-heatmap-wrap">
+          <ejs-heatmap
+            id="cost-variance-heatmap"
+            [dataSource]="heatmapData()"
+            height="180px"
+            width="100%"
+            [margin]="{ left: 0, right: 0, top: 0, bottom: 0 }"
+            [xAxis]="heatmapXAxis()"
+            [yAxis]="heatmapYAxis()"
+            [paletteSettings]="heatmapPalette()"
+            [cellSettings]="heatmapCellSettings()"
+            [legendSettings]="{ visible: false }"
+            [showTooltip]="false"
+            (loaded)="onHeatmapLoaded($event)"
+            (cellRender)="onHeatmapCellRender($event)"
+          ></ejs-heatmap>
+        </div>
+      </div>
+    </div>
+
+    <div class="card change-order-card grid-card">
+      <div class="card-header">
+        <div><h2 class="card-title">Pending Change Orders</h2><p class="card-subtitle">Awaiting owner approval</p></div>
+        <button type="button" class="btn btn-primary" (click)="openNewChangeOrderModal()">
+          <app-icon name="plus" [size]="14" />New Change Order
+        </button>
+      </div>
+      <div class="toolbar co-toolbar">
+        <div class="toolbar-left">
+          <div class="input-with-icon">
+            <app-icon name="search" [size]="16" />
+            <input type="search" class="input" placeholder="Search CO #, description, project…" [value]="coSearch()" (input)="onSearchChange($any($event.target).value)" style="min-width: 240px" />
+          </div>
+          <select class="select" [value]="coStatus()" (change)="onStatusChange($any($event.target).value)" style="min-width: 160px">
+            @for (s of coStatusOptions; track s) {
+              <option [value]="s">{{ s === 'All' ? 'All statuses' : statusLabel[s] }}</option>
+            }
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="handleExportChangeOrders()" [disabled]="filteredChangeOrders().length === 0">
+            <app-icon name="download" [size]="14" />Export
+          </button>
+        </div>
+      </div>
+      @if (coLoading()) {
+        <div class="loading-state" aria-live="polite">Loading change orders…</div>
+      }
+      @if (!coLoading()) {
+        <div class="grid-card">
+          <ejs-grid
+            [dataSource]="filteredChangeOrders()"
+            [allowPaging]="true"
+            [allowResizing]="true"
+            width="100%"
+            [pageSettings]="{ pageSize: 20, pageCount: 4 }"
+            gridLines="Horizontal"
+            (rowSelected)="onRowSelected($event)"
+          >
+            <e-columns>
+              <e-column field="number" headerText="CO #" width="90">
+                <ng-template #template let-co>
+                  <span class="font-mono cell-clamp-2">{{ co.number }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="projectId" headerText="Project ID" width="110">
+                <ng-template #template let-co>
+                  <span class="cell-clamp-2">{{ co.projectId }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="description" headerText="Description">
+                <ng-template #template let-co>
+                  <span class="cell-wrap cell-clamp-2">{{ co.description }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="requestDate" headerText="Submitted" width="120">
+                <ng-template #template let-co>
+                  <span class="cell-clamp-2">{{ co.requestDate ? formatDate(co.requestDate) : '—' }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="amount" headerText="Amount" width="130">
+                <ng-template #template let-co>
+                  <span class="cell-bold cell-clamp-2">{{ co.amount >= 0 ? '+' : '' }}{{ formatCurrency(co.amount) }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="impactDays" headerText="Schedule Impact" width="140">
+                <ng-template #template let-co>
+                  <span class="cell-clamp-2">{{ co.impactDays ? '+' + co.impactDays + ' days' : '—' }}</span>
+                </ng-template>
+              </e-column>
+              <e-column field="status" headerText="Status" width="130">
+                <ng-template #template let-co>
+                  <span class="badge {{ statusBadge(co.status) }}">{{ statusLabelFor(co.status) }}</span>
+                </ng-template>
+              </e-column>
+            </e-columns>
+          </ejs-grid>
+        </div>
+      }
+    </div>
+  }
+
+  <app-modal
+    [open]="!!selectedCo()"
+    [title]="selectedCo() ? 'Change Order ' + selectedCo()!.number : ''"
+    [subtitle]="selectedCo() ? 'Project ' + selectedCo()!.projectId : undefined"
+    size="lg"
+    (closed)="selectedCo.set(null)"
+  >
+    @if (selectedCo(); as co) {
+      <div class="modal-detail-grid">
+        <div class="modal-detail-item">
+          <span class="modal-detail-label">Status</span>
+          <span class="badge" [class]="statusBadge(co.status)" style="width: fit-content">{{ statusLabelFor(co.status) }}</span>
+        </div>
+        <div class="modal-detail-item">
+          <span class="modal-detail-label">Amount</span>
+          <span class="modal-detail-value">{{ co.amount >= 0 ? '+' : '' }}{{ formatCurrency(co.amount) }}</span>
+        </div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Requested By</span><span class="modal-detail-value">{{ co.requestedBy ?? '—' }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Request Date</span><span class="modal-detail-value">{{ co.requestDate ? formatDate(co.requestDate) : '—' }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Schedule Impact</span><span class="modal-detail-value">{{ co.impactDays ? '+' + co.impactDays + ' days' : 'None' }}</span></div>
+        <div class="modal-detail-item"><span class="modal-detail-label">Approved By</span><span class="modal-detail-value">{{ co.approvedBy ?? '—' }}</span></div>
+        <div class="modal-detail-item is-span-2"><span class="modal-detail-label">Description</span><span class="modal-detail-value" style="font-weight: 400">{{ co.description }}</span></div>
+        @if (co.justification) {
+          <div class="modal-detail-item is-span-2"><span class="modal-detail-label">Justification</span><span class="modal-detail-value" style="font-weight: 400">{{ co.justification }}</span></div>
+        }
+      </div>
+    }
+  </app-modal>
+
+  <app-modal
+    [open]="showNewCoModal()"
+    title="New Change Order"
+    subtitle="Demo template — saved to this view only; nothing is sent to the backend."
+    size="lg"
+    [hasFooter]="true"
+    (closed)="showNewCoModal.set(false)"
+  >
+    <div class="modal-form-grid">
+      <div class="modal-form-field">
+        <label for="co-project">Project ID</label>
+        <input id="co-project" class="input" type="number" [value]="newCoDraft().projectId" (input)="updateDraft({ projectId: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="co-amount">Amount ($)</label>
+        <input id="co-amount" class="input" type="number" [value]="newCoDraft().amount" (input)="updateDraft({ amount: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="co-requestedBy">Requested By</label>
+        <input id="co-requestedBy" class="input" type="text" [value]="newCoDraft().requestedBy" (input)="updateDraft({ requestedBy: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="co-requestDate">Request Date</label>
+        <input id="co-requestDate" class="input" type="date" [value]="newCoDraft().requestDate" (input)="updateDraft({ requestDate: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field">
+        <label for="co-impactDays">Schedule Impact (days)</label>
+        <input id="co-impactDays" class="input" type="number" [value]="newCoDraft().impactDays" (input)="updateDraft({ impactDays: $any($event.target).value })" />
+      </div>
+      <div class="modal-form-field is-span-2">
+        <label for="co-description">Description</label>
+        <textarea id="co-description" class="input" rows="2" [value]="newCoDraft().description" (input)="updateDraft({ description: $any($event.target).value })" required></textarea>
+      </div>
+      <div class="modal-form-field is-span-2">
+        <label for="co-justification">Justification</label>
+        <textarea id="co-justification" class="input" rows="3" [value]="newCoDraft().justification" (input)="updateDraft({ justification: $any($event.target).value })"></textarea>
+      </div>
+    </div>
+    <div modal-footer>
+      <button type="button" class="btn btn-secondary" (click)="showNewCoModal.set(false)">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="handleSaveNewChangeOrder()" [disabled]="!newCoDraft().description.trim()">Save Change Order</button>
+    </div>
+  </app-modal>
+</div>

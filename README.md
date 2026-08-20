@@ -1,6 +1,6 @@
 # Construction Project Controls Dashboard
 
-Construction Project Controls Dashboard is a cross-framework enterprise showcase application built with a shared ASP.NET Core Web API and three Syncfusion-powered clients: Angular, React, and Blazor. 
+Construction Project Controls Dashboard is a cross-framework enterprise showcase application built with a shared ASP.NET Core Web API and two Syncfusion-powered clients: Angular and React.
 
 The application delivers a centralized command center for construction project controls — integrating project management, scheduling, cost control, and field reporting data into one real-time view. Project managers, planners, and stakeholders can track progress, monitor budgets, assess risks, and identify deviations from planned baselines across a portfolio of projects. It also shows how the same enterprise experience can be delivered consistently across different frontend stacks by using Syncfusion UI components.
 
@@ -28,36 +28,35 @@ The application delivers a centralized command center for construction project c
 | --- | --- |
 | API | ASP.NET Core Web API on .NET 10 |
 | Data | Entity Framework Core and PostgreSQL |
-| Angular client | Angular 22, TypeScript, RxJS, Syncfusion Angular UI |
-| React client | React 19, TypeScript, Vite, Syncfusion React UI |
-| Blazor client | Blazor (Interactive Server) on .NET 10, Syncfusion Blazor UI |
+| Angular client | Angular 22, TypeScript, RxJS, Syncfusion Angular UI, Lucide icons |
+| React client | React 19, TypeScript, Vite, Syncfusion React UI, Lucide icons |
 | Testing | .NET xUnit test project |
 
-The UI implementations use Syncfusion components such as DataGrid, Charts, Gantt/Scheduler, Maps, Diagrams, and PDF Viewer.
+The UI implementations use Syncfusion components such as DataGrid, Charts, Gantt/Scheduler, Maps, Diagrams, HeatMap, and PDF Viewer.
 
 ## Why Syncfusion UI components?
 
 This repository is a practical proof of how the [Syncfusion component ecosystem](https://www.syncfusion.com/) can accelerate component-rich enterprise development.
 
 - Production-oriented UI components reduce the amount of custom code required for advanced grids, charts, scheduling, Gantt views, maps, and document viewing.
-- Similar component concepts across Angular, React, and Blazor make it easier to preserve business behavior while choosing the framework that best fits each team.
+- Similar component concepts across Angular and React make it easier to preserve business behavior while choosing the framework that best fits each team.
 - Built-in capabilities such as filtering, grouping, export, responsive rendering, accessibility, and theming help teams focus on business workflows rather than foundational UI infrastructure.
 
 ## Repository structure
 
 ```text
-ConstructionDashboard/
-├── ConstructionProjectControls.slnx     # Solution referencing the four backend projects
-├── backend/
-│   ├── Construction.Api/                # ASP.NET Core Web API, controllers, Swagger
-│   ├── Construction.Core/               # Entities, DTOs, and service/repository interfaces
-│   ├── Construction.Infrastructure/     # EF Core DbContext, migrations, repositories, services, seed data
-│   └── Construction.Tests/              # xUnit test project
-└── frontend/
-    ├── Construction.Angular/            # Angular client
-    ├── Construction.React/              # React client
-    └── Construction.Blazor/             # Blazor Interactive Server client
+showcase-git/
+├── WebAPI/                                  # .NET solution + 4 backend projects
+│   ├── ConstructionProjectControls.slnx     # Solution file
+│   ├── Construction.Api/                     # ASP.NET Core Web API, controllers, Swagger
+│   ├── Construction.Core/                    # Entities, DTOs, and service/repository interfaces
+│   ├── Construction.Infrastructure/        # EF Core DbContext, migrations, repositories, services, seed data
+│   └── Construction.Tests/                   # xUnit test project
+├── Angular/                                 # Angular client
+└── React/                                   # React client (Vite)
 ```
+
+Each frontend is a standalone application with its own `README.md`, `package.json`, and build configuration.
 
 ## Run locally
 
@@ -71,15 +70,15 @@ ConstructionDashboard/
 Create a PostgreSQL database named `ConstructionProjectControls`, then update the connection string in:
 
 ```text
-ConstructionDashboard/backend/Construction.Api/appsettings.Development.json
+WebAPI/Construction.Api/appsettings.Development.json
 ```
 
 ### 1. Start the Web API
 
 ```bash
-cd ConstructionDashboard
+cd WebAPI
 dotnet restore ConstructionProjectControls.slnx
-dotnet run --project backend/Construction.Api/Construction.Api.csproj
+dotnet run --project Construction.Api/Construction.Api.csproj
 ```
 
 The API runs at `http://localhost:5228` (and `https://localhost:7070`), with Swagger UI at the root URL.
@@ -90,15 +89,15 @@ Database migrations and deterministic showcase seeding are **explicit, opt-in** 
 
 ```bash
 # Windows (PowerShell)
-$env:RUN_SEED="true"; dotnet run --project backend/Construction.Api/Construction.Api.csproj
+$env:RUN_SEED="true"; dotnet run --project Construction.Api/Construction.Api.csproj
 # Linux / macOS
-RUN_SEED=true dotnet run --project backend/Construction.Api/Construction.Api.csproj
+RUN_SEED=true dotnet run --project Construction.Api/Construction.Api.csproj
 ```
 
 Set the PostgreSQL connection string via [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) or an environment variable rather than committing a real password:
 
 ```bash
-cd backend/Construction.Api
+cd WebAPI/Construction.Api
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=ConstructionProjectControls;Username=postgres;Password=<your-password>"
 ```
 
@@ -106,54 +105,41 @@ The API also applies a per-IP rate limit (100 requests / 60 seconds) and caps `p
 
 ### 2. Start a frontend
 
-Angular:
+Angular (runs on port `4200`, proxies API requests via `proxy.conf.json`):
 
 ```bash
-cd ConstructionDashboard/frontend/Construction.Angular
+cd Angular
 npm install
 npm start
 ```
 
 Open `http://localhost:4200`.
 
-React:
+React (reads `VITE_API_BASE_URL` from `.env.development`, runs on port `5173`):
 
 ```bash
-cd ConstructionDashboard/frontend/Construction.React
+cd React
 npm install
 npm run dev
 ```
 
-The React client reads `VITE_API_BASE_URL` from `.env.development` and opens at `http://localhost:5173`.
-
-Blazor:
-
-```bash
-cd ConstructionDashboard/frontend/Construction.Blazor
-dotnet run
-```
-
-Open `http://localhost:5023`.
+Open `http://localhost:5173`.
 
 ## Build and test
 
 ```bash
 # Backend
-cd ConstructionDashboard
+cd WebAPI
 dotnet build ConstructionProjectControls.slnx
-dotnet test backend/Construction.Tests/Construction.Tests.csproj
+dotnet test Construction.Tests/Construction.Tests.csproj
 
 # Angular
-cd frontend/Construction.Angular
+cd ../Angular
 npm run build
 
 # React
-cd ../Construction.React
+cd ../React
 npm run build
-
-# Blazor
-cd ../Construction.Blazor
-dotnet build
 ```
 
 ## Licensing

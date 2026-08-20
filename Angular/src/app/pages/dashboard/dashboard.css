@@ -1,0 +1,212 @@
+.dashboard-page {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.dashboard-page .kpi-card.is-clickable {
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.dashboard-page .kpi-card.is-clickable:hover,
+.dashboard-page .kpi-card.is-clickable:focus-visible {
+  box-shadow: var(--card-shadow-hover);
+}
+
+.chart-legend {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  font-size: var(--text-caption-size);
+  color: var(--color-secondary);
+}
+
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.health-chart {
+  padding: var(--space-md) 0;
+}
+
+/* ── Donut wrapper (Syncfusion AccumulationChart) ────────────────────────
+   Replaces the old conic-gradient `.donut` div. The doughnut SVG renders
+   140×140; the centre `.donut-hole` overlay sits at inset:22% which equals
+   innerRadius 56%. */
+.dashboard-page .health-chart-donut {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+}
+
+.dashboard-page .dashboard-health-donut,
+.dashboard-page .dashboard-health-donut.e-control,
+.dashboard-page .dashboard-health-donut .e-accumulationchart,
+.dashboard-page .dashboard-health-donut .e-control-wrapper {
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.dashboard-page .dashboard-health-donut svg {
+  width: 140px !important;
+  height: 140px !important;
+  display: block;
+}
+
+.dashboard-page .health-chart-donut .donut-hole {
+  position: absolute;
+  inset: 22%;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+  font-family: var(--font-sans);
+  color: var(--color-primary);
+  text-align: center;
+}
+
+.dashboard-page .health-chart-donut .donut-hole > span {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.dashboard-page .health-chart-donut .donut-hole > small {
+  font-size: var(--text-caption-size);
+  color: var(--color-secondary);
+}
+
+/* ── Cost Performance Trend wrapper (Syncfusion ChartComponent) ──────── */
+.dashboard-page .dashboard-chart {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 208px;
+  position: relative;
+}
+
+.dashboard-page .dashboard-chart .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  color: var(--color-muted);
+  font-size: var(--text-small-size);
+}
+
+/* Strip ej2 default chrome (no Material theme beyond the global
+   import in styles.css; page-scoped to keep existing widgets intact).
+   Specificity is parent-scoped (0,2,0) which beats a single .e-chart rule
+   on specificity AND source order — matches the React approach.  */
+.dashboard-page .dashboard-cost-trend,
+.dashboard-page .dashboard-cost-trend.e-chart,
+.dashboard-page .dashboard-cost-trend .e-chart,
+.dashboard-page .dashboard-cost-trend .e-control-wrapper,
+.dashboard-page .dashboard-cost-trend .e-chart-wrap {
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--font-sans) !important;
+  max-width: 100%;
+}
+
+.dashboard-page .dashboard-cost-trend .e-chart-area,
+.dashboard-page .dashboard-cost-trend .e-series-container,
+.dashboard-page .dashboard-cost-trend .e-user-interaction,
+.dashboard-page .dashboard-cost-trend .e-chartborder {
+  background: transparent !important;
+  border: none !important;
+}
+
+.dashboard-page .dashboard-cost-trend *::before,
+.dashboard-page .dashboard-cost-trend *::after {
+  box-shadow: none !important;
+}
+
+.dashboard-page .dashboard-cost-trend .e-axis-x,
+.dashboard-page .dashboard-cost-trend .e-axis-y {
+  border: none !important;
+}
+
+/* Hide any residual plot-area border (ej2 sometimes draws an SVG path
+   we can't reach from props). Matches the React sentinel selector list. */
+.dashboard-page .dashboard-cost-trend svg .e-chart-area-border,
+.dashboard-page .dashboard-cost-trend svg .e-chart-border,
+.dashboard-page .dashboard-cost-trend [id$="_chartborder"],
+.dashboard-page .dashboard-cost-trend [id$="_chart_border"],
+.dashboard-page .dashboard-cost-trend [id$="_ChartArea_Border"],
+.dashboard-page .dashboard-cost-trend [id$="_ChartBorder"] {
+  stroke: transparent !important;
+  stroke-width: 0 !important;
+  fill: transparent !important;
+  display: none !important;
+}
+
+/* ── Schedule at a Glance — Syncfusion Grid parity overrides ────────
+   Reproduce the React `.grid-card` look: 1px border, --radius-md,
+   --color-background, header strip in --color-surface, hover row tint
+   via --table-row-bg-hover. Strip ej2 default chrome — same 0,2,0
+   page-scoped specificity rule that beats single .e-grid (0,1,0). */
+.dashboard-page .grid-card {
+  border: var(--table-border);
+  border-radius: var(--card-radius);
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.dashboard-page .grid-card .e-grid {
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--font-sans) !important;
+}
+
+.dashboard-page .grid-card .e-gridheader,
+.dashboard-page .grid-card .e-headercell {
+  background: var(--color-surface) !important;
+  color: var(--color-secondary) !important;
+  font-weight: 600 !important;
+  font-size: var(--text-caption-size) !important;
+  border-color: var(--color-border) !important;
+}
+
+.dashboard-page .grid-card .e-rowcell,
+.dashboard-page .grid-card .e-content,
+.dashboard-page .grid-card .e-table {
+  background: var(--color-background) !important;
+  color: var(--color-primary) !important;
+  font-size: var(--text-small-size) !important;
+  border-color: var(--color-border) !important;
+}
+
+.dashboard-page .grid-card .e-row:hover .e-rowcell {
+  background: var(--table-row-bg-hover) !important;
+}
+
+.dashboard-page .grid-card .cell-clamp-2 {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.dashboard-page .grid-card .e-grid .badge {
+  font-size: var(--text-caption-size);
+  padding: 2px 8px;
+}

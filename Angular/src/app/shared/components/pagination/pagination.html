@@ -1,0 +1,25 @@
+@if (totalCount > pageSize) {
+  <div class="pagination" role="navigation" aria-label="Pagination">
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm"
+      [disabled]="page <= 1"
+      (click)="pageChange.emit(page - 1)"
+      aria-label="Previous page"
+    >
+      <app-icon name="chevron-left" [size]="16" />
+    </button>
+    <span class="pagination-info">
+      Page <strong>{{ page }}</strong> of {{ totalPages }}
+    </span>
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm"
+      [disabled]="page >= totalPages"
+      (click)="pageChange.emit(page + 1)"
+      aria-label="Next page"
+    >
+      <app-icon name="chevron-right" [size]="16" />
+    </button>
+  </div>
+}
