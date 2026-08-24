@@ -103,38 +103,14 @@
 
             <div class="card">
                 <div class="card-header"><div><h2 class="card-title">Cost Variance Heatmap</h2><p class="card-subtitle">By cost code</p></div></div>
-                <div class="cost-heatmap-wrap">
-                    @if (_paletteReady && _variances.Count > 0)
+                <div class="cost-heatmap">
+                    @foreach (var v in _variances)
                     {
-                        <SfHeatMap @ref="_heatmap"
-                                   TValue="object"
-                                   DataSource="@HeatmapData"
-                                   Height="180px"
-                                   Width="100%"
-                                   Theme="@Syncfusion.Blazor.Theme.Material"
-                                   ShowTooltip="false">
-                            <HeatMapXAxis Labels="@HeatmapXAxisLabels" ValueType="Syncfusion.Blazor.HeatMap.ValueType.Category"
-                                          OpposedPosition="true">
-                                <HeatMapXAxisTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
-                            </HeatMapXAxis>
-                            <HeatMapYAxis Labels="@(new[] { "Variance" })" OpposedPosition="false">
-                                <HeatMapYAxisTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
-                            </HeatMapYAxis>
-                            <HeatMapPaletteSettings Type="PaletteType.Fixed">
-                                <HeatMapPalettes>
-                                    <HeatMapPalette Color="@Palette.PositiveBg" />
-                                    <HeatMapPalette Color="@Palette.WarningBg" />
-                                    <HeatMapPalette Color="@Palette.NegativeBg" />
-                                </HeatMapPalettes>
-                            </HeatMapPaletteSettings>
-                            <HeatMapCellSettings ShowLabel="true">
-                                <HeatMapCellTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
-                                <HeatMapCellBorder Width="4" Color="@Palette.CardBackground" Radius="6" />
-                            </HeatMapCellSettings>
-                            <HeatMapLegendSettings Visible="false" />
-                            <HeatMapMargin Left="0" Right="0" Top="0" Bottom="0" />
-                            <HeatMapEvents TValue="object" CellRendering="OnHeatmapCellRender" />
-                        </SfHeatMap>
+                        <div class="cost-heatmap-cell @HeatmapClass(v.VariancePct)">
+                            @v.CostCode
+                            <br />
+                            <span>@(v.VariancePct >= 0 ? "+" : "")@v.VariancePct%</span>
+                        </div>
                     }
                 </div>
             </div>

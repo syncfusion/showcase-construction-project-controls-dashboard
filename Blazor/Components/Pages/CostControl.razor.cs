@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Syncfusion.Blazor.Charts;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.HeatMap;
 
 namespace Construction.Blazor.Components.Pages;
 
@@ -54,7 +53,6 @@ public partial class CostControl : ComponentBase
     // Syncfusion component state — see Dashboard for the full pattern.
     private bool _paletteReady;
     private SfChart? _chart;
-    private SfHeatMap<object>? _heatmap;
     private SfGrid<ChangeOrderSummaryDto>? _coGrid;
 
     private class NewChangeOrderDraft
@@ -129,27 +127,17 @@ public partial class CostControl : ComponentBase
         public double Actual { get; set; }
     }
 
-    // Cost Variance HeatMap data — a 1×N `double[,]` 2D array. The Blazor
-    // HeatMap's DataSource property is `object`, and the Table adaptor (the
-    // default) expects a 2D array of numeric values. We use 0/1/2 tone
-    // scores and let CellRendering paint the actual background colour per
-    // cell using the in-house token palette.
-    private object HeatmapData => BuildHeatmapData();
-
-    private double[,] BuildHeatmapData()
+    // Matches the React reference's plain CSS tone-card grid (CostControlPage.tsx
+    // heatmapClass) — not a Syncfusion HeatMap. The `is-*` classes and their
+    // colors (background + saturated foreground text) are already defined in
+    // CostControl.razor.css and reused by the badge/alert styles, so this
+    // automatically reads correctly in both light and dark mode.
+    private static string HeatmapClass(decimal variancePct) => variancePct switch
     {
-        var n = _variances.Count;
-        var data = new double[1, Math.Max(1, n)];
-        for (int i = 0; i < n; i++)
-        {
-            data[0, i] = VarianceToneScore(_variances[i].VariancePct);
-        }
-        return data;
-    }
-
-    private static int VarianceToneScore(decimal variancePct) => variancePct >= 0 ? 0 : variancePct >= -5 ? 1 : 2;
-
-    private string[] HeatmapXAxisLabels => _variances.Select(v => v.CostCode).ToArray();
+        >= 0 => "is-positive",
+        >= -5 => "is-warning",
+        _ => "is-negative",
+    };
 
     private List<ChangeOrderSummaryDto> FilteredChangeOrders =>
         _changeOrders.Where(co =>
@@ -227,12 +215,4 @@ public partial class CostControl : ComponentBase
     // is left as the cell's default rendered value (the tone score 0/1/2),
     // which keeps the data shape clean. The visible cost-code + variance
     // context comes from the X-axis label and the cell background colour.
-    private void OnHeatmapCellRender(HeatMapCellRenderEventArgs args)
-    {
-        // Find the variance that matches the cell's x-label.
-        var match = _variances.FirstOrDefault(v => v.CostCode == args.XLabel);
-        if (match is null) return;
-        var v = match.VariancePct;
-        args.CellColor = v >= 0 ? Palette.PositiveBg : v >= -5 ? Palette.WarningBg : Palette.NegativeBg;
-    }
 }

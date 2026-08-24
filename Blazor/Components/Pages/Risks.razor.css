@@ -69,59 +69,6 @@
   box-shadow: var(--card-shadow-hover);
 }
 
-.risks-page .risk-matrix {
-  display: grid;
-  gap: var(--space-xs);
-  align-items: center;
-  font-size: var(--text-small-size);
-}
-
-.risks-page .risk-matrix-row {
-  display: grid;
-  grid-template-columns: 120px repeat(4, 1fr);
-  gap: var(--space-xs);
-  align-items: center;
-}
-
-.risks-page .risk-matrix-label {
-  text-align: right;
-  padding-right: var(--space-sm);
-}
-
-.risks-page .risk-matrix-axis {
-  text-align: center;
-}
-
-.risks-page .risk-matrix-cell {
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  text-align: center;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.risks-page .risk-matrix-cell.is-positive {
-  background: var(--color-success-background);
-  color: var(--color-success);
-}
-
-.risks-page .risk-matrix-cell.is-warning {
-  background: var(--color-warning-background);
-  color: var(--color-warning);
-}
-
-.risks-page .risk-matrix-cell.is-negative {
-  background: var(--color-error-background);
-  color: var(--color-error);
-}
-
-.risks-page .risk-matrix-cell.is-negative.is-emphasis {
-  font-weight: 700;
-}
-
-.risks-page .risk-matrix-cell.is-info {
-  background: var(--color-info-background);
-  color: var(--color-info);
+.risks-page .risk-matrix-wrap {
+  min-height: 220px;
 }

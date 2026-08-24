@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.HeatMap;
 
 namespace Construction.Blazor.Components.Pages;
 
@@ -10,8 +11,11 @@ public partial class Risks : ComponentBase
     [Inject] private RiskMatrixService RiskMatrixApi { get; set; } = default!;
     [Inject] private DownloadInterop Download { get; set; } = default!;
     [Inject] private NavigationManager Nav { get; set; } = default!;
+    [Inject] private ChartPaletteService Palette { get; set; } = default!;
 
     private SfGrid<RiskDto>? _risksGrid;
+    private SfHeatMap<object>? _matrixHeatmap;
+    private bool _paletteReady;
 
     private static readonly Dictionary<RiskSeverity, string> SeverityBadgeClass = new()
     {
@@ -61,7 +65,6 @@ public partial class Risks : ComponentBase
 
     private static readonly RiskSeverity[] Severities = [RiskSeverity.Low, RiskSeverity.Medium, RiskSeverity.High, RiskSeverity.Critical];
     private static readonly RiskProbability[] Probabilities = [RiskProbability.Low, RiskProbability.Medium, RiskProbability.High];
-    private static readonly RiskProbability[] ReversedProbabilities = [.. Probabilities.Reverse()];
 
     private List<RiskDto> _risks = [];
     private RiskKpisDto? _kpis;
@@ -114,6 +117,16 @@ public partial class Risks : ComponentBase
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_paletteReady)
+        {
+            await Palette.ResolveAsync();
+            _paletteReady = true;
+            StateHasChanged();
+        }
+    }
+
     private static string FormatImpact(int? impactDays, decimal? impactCost)
     {
         var parts = new List<string>();
@@ -163,13 +176,56 @@ public partial class Risks : ComponentBase
         return "info";
     }
 
-    private static string MatrixClass(string tone) => tone switch
+    private static readonly Dictionary<string, int> MatrixToneScore = new()
     {
-        "negative" => "is-negative is-emphasis",
-        "warning" => "is-warning",
-        "positive" => "is-positive",
-        _ => "is-info",
+        ["positive"] = 0, ["info"] = 1, ["warning"] = 2, ["negative"] = 3,
     };
+
+    // Syncfusion's Table-bound HeatMap indexes the array as [xIndex, yIndex]
+    // (first dimension = X-axis category count, second = Y-axis category
+    // count) — the opposite of the usual [row, col] mental model. It also
+    // renders the Y-axis bottom-up (index 0 at the bottom), so the labels
+    // array is given in bottom-to-top order (Low, Medium, High) to get the
+    // conventional top-down High/Medium/Low risk-matrix layout on screen.
+    // X = severity (4, left-right: Low, Medium, High, Critical). The numeric
+    // score only drives the fixed palette's fallback banding;
+    // OnMatrixCellRender overrides the actual per-cell color so the mapping
+    // is authoritative either way.
+    private object MatrixData => BuildMatrixData();
+
+    private double[,] BuildMatrixData()
+    {
+        var data = new double[Severities.Length, Probabilities.Length];
+        for (int x = 0; x < Severities.Length; x++)
+        {
+            for (int y = 0; y < Probabilities.Length; y++)
+            {
+                data[x, y] = MatrixToneScore[MatrixTone(Severities[x], Probabilities[y])];
+            }
+        }
+        return data;
+    }
+
+    private string[] MatrixXAxisLabels => Severities.Select(s => s.ToString()).ToArray();
+    private string[] MatrixYAxisLabels => Probabilities.Select(p => p.ToString()).ToArray();
+
+    private void OnMatrixCellRender(HeatMapCellRenderEventArgs args)
+    {
+        if (!Enum.TryParse<RiskSeverity>(args.XLabel, out var severity) ||
+            !Enum.TryParse<RiskProbability>(args.YLabel, out var probability))
+        {
+            return;
+        }
+
+        args.CellColor = MatrixTone(severity, probability) switch
+        {
+            "negative" => Palette.NegativeBg,
+            "warning" => Palette.WarningBg,
+            "positive" => Palette.PositiveBg,
+            _ => Palette.InfoBg,
+        };
+        args.CellValue = MatrixCellDisplay(probability, severity);
+    }
 
     private void OnSearchChanged(ChangeEventArgs e) => _search = e.Value?.ToString() ?? "";
 

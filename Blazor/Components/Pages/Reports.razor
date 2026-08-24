@@ -1,0 +1,128 @@
+@page "/reports"
+@layout MainLayout
+@using Syncfusion.Blazor.Charts
+
+<PageTitle>Reports</PageTitle>
+
+<div class="reports-page">
+    <header class="page-header">
+        <h1>Reports</h1>
+        <p>Historical trends, filters, and export-ready dashboards.</p>
+    </header>
+
+    @if (_loading)
+    {
+        <div class="loading-state" aria-live="polite">Loading reports…</div>
+    }
+    @if (_error is not null)
+    {
+        <div class="alert alert-error" role="alert">@_error</div>
+    }
+
+    @if (!_loading && _error is null)
+    {
+        <div class="two-column-grid">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Earned Value Trend</h2>
+                        <p class="card-subtitle">BCWS vs. BCWP vs. ACWP by month</p>
+                    </div>
+                </div>
+                <div class="dashboard-chart" role="img" aria-label="Earned value trend: planned value, earned value, and actual cost by month">
+                    @if (_evData.Count == 0)
+                    {
+                        <div class="empty-state"><i class="icon icon-bar-chart-3" aria-hidden="true" style="font-size: 48px"></i><p>No trend data available</p></div>
+                    }
+                    @if (_paletteReady)
+                    {
+                        <SfChart @ref="_evChart"
+                                 Width="100%" Height="320px"
+                                 Background="transparent"
+                                 Theme="@Syncfusion.Blazor.Theme.Material"
+                                 Palettes="@(new[] { Palette.Planned, Palette.Actual, Palette.AtRisk })">
+                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Month">
+                                <ChartXAxisLabelStyle Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" Size="@Palette.CaptionSize" FontWeight="500" />
+                                <ChartXAxisLineStyle Color="@Palette.AxisLine" Width="1" />
+                                <ChartXAxisMajorGridLines Width="0" />
+                                <ChartXAxisMajorTickLines Width="0" />
+                            </ChartPrimaryXAxis>
+                            <ChartPrimaryYAxis Title="Value ($)">
+                                <ChartYAxisLabelStyle Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" Size="@Palette.CaptionSize" FontWeight="500" />
+                                <ChartYAxisLineStyle Width="0" />
+                                <ChartYAxisMajorGridLines Color="@Palette.AxisLine" Width="1" />
+                                <ChartYAxisMajorTickLines Width="0" />
+                            </ChartPrimaryYAxis>
+                            <ChartTooltipSettings Enable="true" Shared="true"
+                                                  Fill="@Palette.TooltipBg"
+                                                  Opacity="1"
+                                                  Border="new Syncfusion.Blazor.Charts.ChartTooltipBorder { Width = 0 }">
+                                <ChartTooltipTextStyle Color="@Palette.TooltipText" FontFamily="@Palette.FontFamily" Size="12px" />
+                            </ChartTooltipSettings>
+                            <ChartLegendSettings Visible="true" Position="Syncfusion.Blazor.Charts.LegendPosition.Bottom">
+                                <ChartLegendTextStyle Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" Size="@Palette.CaptionSize" />
+                            </ChartLegendSettings>
+                            <ChartArea><ChartAreaBorder Width="0" Color="transparent" /></ChartArea>
+                            <ChartMargin Top="6" Right="4" Bottom="2" Left="4" />
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@_evData" XName="Month" YName="Bcws" Name="Planned Value (BCWS)" Type="ChartSeriesType.Line" Width="2" />
+                                <ChartSeries DataSource="@_evData" XName="Month" YName="Bcwp" Name="Earned Value (BCWP)" Type="ChartSeriesType.Line" Width="2" />
+                                <ChartSeries DataSource="@_evData" XName="Month" YName="Acwp" Name="Actual Cost (ACWP)" Type="ChartSeriesType.Line" Width="2" />
+                            </ChartSeriesCollection>
+                        </SfChart>
+                    }
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Cost Variance by Cost Code</h2>
+                        <p class="card-subtitle">Variance percentage against budget</p>
+                    </div>
+                </div>
+                <div class="dashboard-chart" role="img" aria-label="Cost variance percentage by cost code">
+                    @if (_cvData.Count == 0)
+                    {
+                        <div class="empty-state"><i class="icon icon-bar-chart-3" aria-hidden="true" style="font-size: 48px"></i><p>No variance data available</p></div>
+                    }
+                    @if (_paletteReady)
+                    {
+                        <SfChart @ref="_cvChart"
+                                 Width="100%" Height="320px"
+                                 Background="transparent"
+                                 Theme="@Syncfusion.Blazor.Theme.Material"
+                                 Palettes="@(new[] { Palette.Planned })">
+                            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Cost Code">
+                                <ChartXAxisLabelStyle Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" Size="@Palette.CaptionSize" FontWeight="500" />
+                                <ChartXAxisLineStyle Color="@Palette.AxisLine" Width="1" />
+                                <ChartXAxisMajorGridLines Width="0" />
+                                <ChartXAxisMajorTickLines Width="0" />
+                            </ChartPrimaryXAxis>
+                            <ChartPrimaryYAxis Title="Variance (%)">
+                                <ChartYAxisLabelStyle Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" Size="@Palette.CaptionSize" FontWeight="500" />
+                                <ChartYAxisLineStyle Width="0" />
+                                <ChartYAxisMajorGridLines Color="@Palette.AxisLine" Width="1" />
+                                <ChartYAxisMajorTickLines Width="0" />
+                            </ChartPrimaryYAxis>
+                            <ChartTooltipSettings Enable="true"
+                                                  Fill="@Palette.TooltipBg"
+                                                  Opacity="1"
+                                                  Border="new Syncfusion.Blazor.Charts.ChartTooltipBorder { Width = 0 }">
+                                <ChartTooltipTextStyle Color="@Palette.TooltipText" FontFamily="@Palette.FontFamily" Size="12px" />
+                            </ChartTooltipSettings>
+                            <ChartLegendSettings Visible="false" />
+                            <ChartArea><ChartAreaBorder Width="0" Color="transparent" /></ChartArea>
+                            <ChartMargin Top="6" Right="4" Bottom="2" Left="4" />
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@_cvData" XName="CostCode" YName="Variance" Name="Variance %" Type="ChartSeriesType.Column"
+                                             ColumnWidth="0.5"
+                                             CornerRadius="new Syncfusion.Blazor.Charts.ChartCornerRadius { TopLeft = 2, TopRight = 2 }" />
+                            </ChartSeriesCollection>
+                        </SfChart>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

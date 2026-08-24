@@ -1,6 +1,7 @@
 @page "/risks"
 @layout MainLayout
 @using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.HeatMap
 
 <PageTitle>Risks &amp; Issues</PageTitle>
 
@@ -133,24 +134,42 @@
 
         <div class="card risk-matrix-card">
             <div class="card-header"><div><h2 class="card-title">Risk Matrix</h2><p class="card-subtitle">Probability × Impact</p></div></div>
-            <div class="risk-matrix">
-                @foreach (var probability in ReversedProbabilities)
+            <div class="risk-matrix-wrap">
+                @if (_paletteReady)
                 {
-                    <div class="risk-matrix-row">
-                        <div class="risk-matrix-label text-secondary">@probability</div>
-                        @foreach (var severity in Severities)
-                        {
-                            <div class="risk-matrix-cell @MatrixClass(MatrixTone(severity, probability))">@MatrixCellDisplay(probability, severity)</div>
-                        }
-                    </div>
+                    <SfHeatMap @ref="_matrixHeatmap"
+                               TValue="object"
+                               DataSource="@MatrixData"
+                               Height="220px"
+                               Width="100%"
+                               Background="transparent"
+                               Theme="@Syncfusion.Blazor.Theme.Material">
+                        <HeatMapXAxis Labels="@MatrixXAxisLabels" ValueType="Syncfusion.Blazor.HeatMap.ValueType.Category"
+                                      OpposedPosition="true">
+                            <HeatMapXAxisTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
+                        </HeatMapXAxis>
+                        <HeatMapYAxis Labels="@MatrixYAxisLabels" ValueType="Syncfusion.Blazor.HeatMap.ValueType.Category"
+                                      OpposedPosition="false">
+                            <HeatMapYAxisTextStyle Size="12px" Color="@Palette.AxisLabel" FontFamily="@Palette.FontFamily" />
+                        </HeatMapYAxis>
+                        <HeatMapPaletteSettings Type="PaletteType.Fixed">
+                            <HeatMapPalettes>
+                                <HeatMapPalette Color="@Palette.PositiveBg" />
+                                <HeatMapPalette Color="@Palette.InfoBg" />
+                                <HeatMapPalette Color="@Palette.WarningBg" />
+                                <HeatMapPalette Color="@Palette.NegativeBg" />
+                            </HeatMapPalettes>
+                        </HeatMapPaletteSettings>
+                        <HeatMapCellSettings ShowLabel="true">
+                            <HeatMapCellTextStyle Size="12px" Color="@Palette.Foreground" FontFamily="@Palette.FontFamily" FontWeight="600" />
+                            <HeatMapCellBorder Width="4" Color="@Palette.CardBackground" Radius="6" />
+                        </HeatMapCellSettings>
+                        <HeatMapLegendSettings Visible="false" />
+                        <HeatMapTooltipSettings Enable="false" />
+                        <HeatMapMargin Left="0" Right="0" Top="0" Bottom="0" />
+                        <HeatMapEvents CellRendering="OnMatrixCellRender" />
+                    </SfHeatMap>
                 }
-                <div class="risk-matrix-row">
-                    <div></div>
-                    @foreach (var s in Severities)
-                    {
-                        <div class="risk-matrix-axis text-secondary">@s</div>
-                    }
-                </div>
             </div>
         </div>
     }
