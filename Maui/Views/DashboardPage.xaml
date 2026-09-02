@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Dashboard screen — mirrors the React/Blazor Dashboard layout:
+     KPI grid (Active Projects, SV, CV, Critical Risks)
+     + Cost Performance Trend (SfCartesianChart, planned vs actual bars)
+     + Portfolio Health Distribution (SfCircularChart donut + legend)
+     + Upcoming Milestones (14-day horizon, top 10). -->
+<controls:ScreenBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:controls="clr-namespace:Construction.Maui.Controls"
+                     xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+                     xmlns:vm="clr-namespace:Construction.Maui.ViewModels"
+                     xmlns:models="clr-namespace:Construction.Maui.Models"
+                     x:Class="Construction.Maui.Views.DashboardPage"
+                     x:DataType="vm:DashboardViewModel"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+             NavigationPage.HasNavigationBar="False">
+
+    <ScrollView Padding="{StaticResource PagePadding}">
+        <VerticalStackLayout Spacing="{StaticResource SpaceXl}" MaximumWidthRequest="{StaticResource ContentMaxWidth}">
+
+            <!-- Header -->
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Dashboard" Style="{StaticResource TextH1}" />
+                <Label Text="Real-time project controls across the construction portfolio."
+                       Style="{StaticResource TextBodyMuted}" />
+            </VerticalStackLayout>
+
+            <!-- Loading / Error / Empty states -->
+            <ActivityIndicator IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" />
+            <Border IsVisible="{Binding HasError}" Style="{StaticResource CardBorder}"
+                    Stroke="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}">
+                <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}" />
+            </Border>
+
+            <!-- KPI cards — 6 React-parity cards (Active Projects, SV, CV, CPI, SPI,
+                 Open Risks). Laid out in a FlexLayout (MAUI's flex-box) that mirrors
+                 the React `.kpi-grid { grid-template-columns: repeat(auto-fit, minmax(220px,1fr)) }`:
+                 each card has Basis=200 (so it starts ~200px wide) + Grow=1 (fills the
+                 row), and wraps to the next row when the row is full — 3 per row on
+                 wide desktop, 2 on tablet, 1 on phone — automatically, with no manual
+                 AdaptiveGrids.Reflow needed. Cards are compact (Padding 14/16) to match
+                 the React `.kpi-card`. Each card: caption label + large KPI value + a
+                 tone-colored trend line (positive=success, negative=error, warning)
+                 resolving correctly in light AND dark mode via AppThemeBinding. -->
+            <FlexLayout x:Name="KpiGrid"
+                        IsVisible="{Binding HasData}"
+                        Direction="Row"
+                        Wrap="Wrap"
+                        JustifyContent="Start"
+                        AlignItems="Start"
+                        AlignContent="Start"
+                        HorizontalOptions="Fill"
+                        Margin="0,0,0,24">
+
+                <!-- 1. Active Projects — tone: positive -->
+                <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                        FlexLayout.Basis="200" FlexLayout.Grow="1"
+                        Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="Active Projects" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding Portfolio.ActiveProjects}" Style="{StaticResource TextKpiValue}" />
+                        <HorizontalStackLayout Spacing="6">
+                            <Image Source="{x:Static controls:Icon.ArrowUpRight}" VerticalOptions="Center" />
+                            <Label Text="3 this quarter" Style="{StaticResource TextCaption}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Success600}, Dark={StaticResource Success500}}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 2. Schedule Variance (SV) — tone: positive/negative by sign -->
+                <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                        FlexLayout.Basis="200" FlexLayout.Grow="1"
+                        Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="Schedule Variance (SV)" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding ScheduleVarianceDisplay}" Style="{StaticResource TextKpiValue}" />
+                        <Label Text="{Binding ScheduleVarianceTrend}" Style="{StaticResource TextCaption}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 3. Cost Variance (CV) — tone: positive/negative by sign -->
+                <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                        FlexLayout.Basis="200" FlexLayout.Grow="1"
+                        Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="Cost Variance (CV)" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding CostVarianceDisplay}" Style="{StaticResource TextKpiValue}" />
+                        <Label Text="{Binding CostVarianceTrend}" Style="{StaticResource TextCaption}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 4. CPI — tone: positive (>=1) / warning -->
+                <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                        FlexLayout.Basis="200" FlexLayout.Grow="1"
+                        Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="CPI" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding CpiDisplay}" Style="{StaticResource TextKpiValue}" />
+                        <Label Text="{Binding CpiTrend}" Style="{StaticResource TextCaption}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 5. SPI — tone: positive (>=1) / negative -->
+                <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                        FlexLayout.Basis="200" FlexLayout.Grow="1"
+                        Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="SPI" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding SpiDisplay}" Style="{StaticResource TextKpiValue}" />
+                        <Label Text="{Binding SpiTrend}" Style="{StaticResource TextCaption}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- 6. Open Risks — tone: negative when critical>0 else positive -->
+                <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                        FlexLayout.Basis="200" FlexLayout.Grow="1"
+                        Margin="0,0,16,16">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="Open Risks" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding Portfolio.OpenRisks}" Style="{StaticResource TextKpiValue}" />
+                        <HorizontalStackLayout Spacing="6">
+                            <Image Source="{x:Static controls:Icon.Risks}" VerticalOptions="Center" />
+                            <Label Text="{Binding OpenRisksTrend}" Style="{StaticResource TextCaption}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </FlexLayout>
+
+            <!-- Trend + Health distribution — reflows to 1 column on narrow widths. -->
+            <Grid x:Name="ChartsGrid" ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceXl}" IsVisible="{Binding HasData}">
+
+                <!-- Cost performance trend -->
+                <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                            <Label Text="Cost Performance Trend" Style="{StaticResource TextH4}" />
+                            <Label Text="Earned value vs. actual spend" Style="{StaticResource TextCaption}" />
+                        </VerticalStackLayout>
+                        <chart:SfCartesianChart Grid.Row="1" HeightRequest="260">
+                            <chart:SfCartesianChart.XAxes>
+                                <chart:CategoryAxis LabelPlacement="BetweenTicks" AutoScrollingDelta="6" ShowMajorGridLines="False">
+                                    <!--<chart:CategoryAxis.Title>
+                                        <chart:ChartAxisTitle Text="Month" />
+                                    </chart:CategoryAxis.Title>-->
+                                    <chart:CategoryAxis.LabelStyle>
+                                        <chart:ChartAxisLabelStyle TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                    </chart:CategoryAxis.LabelStyle>
+                                    <chart:CategoryAxis.AxisLineStyle>
+                                        <chart:ChartLineStyle Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+                                    </chart:CategoryAxis.AxisLineStyle>
+                                </chart:CategoryAxis>
+                            </chart:SfCartesianChart.XAxes>
+                            <chart:SfCartesianChart.YAxes>
+                                <chart:NumericalAxis IsVisible="False" ShowMajorGridLines="False" ShowMinorGridLines="False">
+                                    <chart:NumericalAxis.LabelStyle>
+                                        <chart:ChartAxisLabelStyle TextColor="Transparent" />
+                                    </chart:NumericalAxis.LabelStyle>
+                                </chart:NumericalAxis>
+                            </chart:SfCartesianChart.YAxes>
+                            <chart:SfCartesianChart.Series>
+                                <chart:ColumnSeries ItemsSource="{Binding Trend}"
+                                                    XBindingPath="Month" YBindingPath="Planned"
+                                                    Fill="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}"
+                                                    CornerRadius="8,8,0,0"
+                                                    EnableTooltip="True" />
+                                <chart:ColumnSeries ItemsSource="{Binding Trend}"
+                                                    XBindingPath="Month" YBindingPath="Actual"
+                                                    Fill="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                                                    CornerRadius="8,8,0,0"
+                                                    EnableTooltip="True" />
+                            </chart:SfCartesianChart.Series>
+                        </chart:SfCartesianChart>
+                    </Grid>
+                </Border>
+
+                <!-- Portfolio health distribution (donut) -->
+                <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                            <Label Text="Portfolio Health" Style="{StaticResource TextH4}" />
+                            <Label Text="{Binding HealthLegend}" Style="{StaticResource TextCaption}" />
+                        </VerticalStackLayout>
+                        <chart:SfCircularChart Grid.Row="1" HeightRequest="260">
+                            <chart:SfCircularChart.Series>
+                                <chart:DoughnutSeries ItemsSource="{Binding HealthSegments}"
+                                                      XBindingPath="Label"
+                                                      YBindingPath="Value"
+                                                      PaletteBrushes="{Binding HealthPalette}"
+                                                      EnableTooltip="True" />
+                            </chart:SfCircularChart.Series>
+                        </chart:SfCircularChart>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Upcoming milestones -->
+            <Border Style="{StaticResource CardBorder}" IsVisible="{Binding HasData}">
+                <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                    <Label Grid.Row="0" Text="Upcoming Milestones (14 days)" Style="{StaticResource TextH4}" />
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding Milestones}" HeightRequest="280">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:UpcomingMilestoneDto">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" Padding="0,8,0,8">
+                                    <BoxView HeightRequest="1" VerticalOptions="End" Grid.ColumnSpan="3"
+                                             BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="{Binding Title}" Style="{StaticResource TextBody}" />
+                                        <Label Text="{Binding ProjectCode}" Style="{StaticResource TextCaption}" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="1" Text="{Binding DueDate, StringFormat='{0:MMM d}'}"
+                                           Style="{StaticResource TextSmall}" VerticalOptions="Center" />
+                                    <Label Grid.Column="2" Text="{Binding Owner}"
+                                           Style="{StaticResource TextCaption}" VerticalOptions="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</controls:ScreenBase>

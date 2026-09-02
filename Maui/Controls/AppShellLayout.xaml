@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Adaptive application shell layout (desktop-first, then mobile):
+     - Wide  (effective width >= 1024): full 140px sidebar always visible.
+     - Medium (768..1023): 64px icon rail.
+     - Narrow (< 768):     sidebar hidden; a hamburger in the topbar opens it as an
+       off-canvas drawer over a scrim. Tapping the scrim or a nav item closes it.
+     DeviceInfo.Idiom forces phones to narrow and tablets to medium regardless of
+     measured width (so a phone in landscape still gets the drawer). State is
+     driven from AppShellLayout.xaml.cs via the visual state group "ShellLayout".
+     Widths mirror the SidebarWidth / ShellSidebarCollapsedWidth tokens in Sizes.xaml. -->
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Construction.Maui.Controls"
+    x:Class="Construction.Maui.Controls.AppShellLayout"
+    x:Name="Root"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+    NavigationPage.HasNavigationBar="False">
+
+    <Grid x:Name="RootGrid"
+          ColumnDefinitions="0,*"
+          RowDefinitions="56,*">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="ShellLayout">
+                <VisualState x:Name="Wide">
+                    <VisualState.Setters>
+                        <Setter Property="ColumnDefinitions" Value="200,*" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Medium">
+                    <VisualState.Setters>
+                        <Setter Property="ColumnDefinitions" Value="64,*" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Narrow">
+                    <VisualState.Setters>
+                        <Setter Property="ColumnDefinitions" Value="0,*" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <!-- Sidebar spans both rows. The sidebar's own width follows the shell column
+             via WidthRequest bound from code-behind (see ApplyShellLayout). -->
+        <controls:Sidebar x:Name="Sidebar"
+                          Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                          NavigateCommand="{Binding NavigateCommand, Source={x:Reference Root}}" />
+
+        <!-- Topbar -->
+        <Grid Grid.Row="0" Grid.Column="1"
+              ColumnDefinitions="Auto,*,Auto"
+              Padding="12,0,16,0"
+              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <BoxView Grid.ColumnSpan="3"
+                     HeightRequest="1"
+                     VerticalOptions="End"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+            <!-- Hamburger — only visible in Narrow mode (toggled from code-behind). -->
+            <Button Grid.Column="0"
+                    x:Name="Hamburger"
+                    Style="{StaticResource ButtonIcon}"
+                    Clicked="OnHamburger"
+                    ImageSource="{x:Static controls:Icon.Menu}"
+                    SemanticProperties.Description="Open navigation"
+                    IsVisible="False" />
+            <Label Grid.Column="1"
+                   x:Name="PageTitle"
+                   Style="{StaticResource TextH4}"
+                   VerticalOptions="Center"
+                   Margin="12,0,0,0" />
+            <HorizontalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center">
+                <Button Style="{StaticResource ButtonIcon}"
+                        Clicked="OnToggleTheme"
+                        x:Name="ThemeToggle"
+                        ImageSource="{x:Static controls:Icon.Moon}"
+                        SemanticProperties.Description="Toggle color theme" />
+                <Button Style="{StaticResource ButtonIcon}"
+                        ImageSource="{x:Static controls:Icon.Bell}"
+                        SemanticProperties.Description="Notifications" />
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Content host -->
+        <ContentPresenter Grid.Row="1" Grid.Column="1" x:Name="ContentArea" Margin="0" />
+
+        <!-- Off-canvas scrim + drawer for Narrow mode. Both overlay the whole page
+             (Column 0..1, Row 0..1) and default to collapsed (IsVisible=False).
+             Only one of Wide/Medium OR Narrow+drawer is active at once. -->
+        <BoxView x:Name="Scrim"
+                 Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2"
+                 Color="#80000000"
+                 IsVisible="False"
+                 Opacity="0">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnScrimTapped" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- The drawer is a copy of the sidebar shown over the scrim in Narrow mode.
+             We reuse the actual Sidebar control so styling stays in sync; we just
+             translate it off the left edge when closed. -->
+        <controls:Sidebar x:Name="Drawer"
+                          Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                          WidthRequest="200"
+                          HorizontalOptions="Start"
+                          TranslationX="-200"
+                          IsVisible="False"
+                          NavigateCommand="{Binding NavigateCommand, Source={x:Reference Root}}" />
+
+    </Grid>
+</ContentPage>

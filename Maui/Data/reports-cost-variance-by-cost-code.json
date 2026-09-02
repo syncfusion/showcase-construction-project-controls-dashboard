@@ -1,0 +1,26 @@
+[
+    {
+        "costCode":  "Concrete",
+        "variancePct":  -3
+    },
+    {
+        "costCode":  "Earthwork",
+        "variancePct":  4
+    },
+    {
+        "costCode":  "Finishes",
+        "variancePct":  1
+    },
+    {
+        "costCode":  "MEP",
+        "variancePct":  -8
+    },
+    {
+        "costCode":  "Steel",
+        "variancePct":  -5
+    },
+    {
+        "costCode":  "General Conditions",
+        "variancePct":  2
+    }
+]

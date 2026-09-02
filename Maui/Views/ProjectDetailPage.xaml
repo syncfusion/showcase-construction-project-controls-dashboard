@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Project Detail page — pushed onto the NavigationPage stack. Matches the
+     React ProjectDetailPage: breadcrumb + title+subtitle header + tab bar
+     (Overview · Schedule · Cost · RFIs · Submittals) via Syncfusion SfTabView.
+
+     Each tab mirrors the React counterpart (same KPIs, sections, grid columns):
+       • Overview  — 6 React-parity KPI cards (Percent Complete+progress bar,
+                    Cost Variance, Schedule Variance, Open RFIs, Open Submittals,
+                    Pending Change Orders) · 2-column panel-grid of
+                    Upcoming Milestones (grid) + Risk Register (alert rows, empty
+                    state "No open risks") · Document Workflow grid (row tap opens
+                    the PDF viewer) · Project Details meta-list card.
+       • Schedule  — milestones grid (Milestone/Description/Planned Date/Status/Owner).
+       • Cost      — 4 React-parity KPI cards (Budget · Spent+progress · Cost
+                    Variance · Pending Change Orders) + Change Orders grid.
+       • RFIs      — RFI#/Subject/Discipline/Impact/Status/Due grid.
+       • Submittals — Sub#/Title/Type/Discipline/Spec Section/Status grid.
+
+     Syncfusion SfDataGrid styling (the React ej2 Grid) is themed manually by the
+     user; only the column mappings + data sources were aligned here. Non-Syncfusion
+     UI (cards, badges, progress bar, meta-list, header) uses the app's own
+     AppThemeBinding tokens so it renders correctly in light AND dark mode. -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Construction.Maui.Controls"
+             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
+             xmlns:pdfviewer="clr-namespace:Syncfusion.Maui.PdfViewer;assembly=Syncfusion.Maui.PdfViewer"
+             xmlns:tabview="clr-namespace:Syncfusion.Maui.TabView;assembly=Syncfusion.Maui.TabView"
+             xmlns:vm="clr-namespace:Construction.Maui.ViewModels"
+             xmlns:models="clr-namespace:Construction.Maui.Models"
+             x:Class="Construction.Maui.Views.ProjectDetailPage"
+             x:Name="Root"
+             x:DataType="vm:ProjectDetailViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+             NavigationPage.HasNavigationBar="False">
+
+    <ScrollView Padding="{StaticResource PagePadding}">
+        <VerticalStackLayout Spacing="{StaticResource SpaceXl}" MaximumWidthRequest="{StaticResource ContentMaxWidth}">
+
+            <!-- Loading / Error -->
+            <ActivityIndicator IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" />
+            <Border IsVisible="{Binding HasError}" Style="{StaticResource CardBorder}"
+                    Stroke="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}">
+                <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}" />
+            </Border>
+
+            <!-- Breadcrumb + Header (React parity: title + subtitle = location · dateRange · budget) -->
+            <VerticalStackLayout Spacing="4" IsVisible="{Binding HasData}">
+                <HorizontalStackLayout Spacing="8">
+                    <Button Style="{StaticResource ButtonIcon}" Clicked="OnGoBack"
+                            ImageSource="{x:Static controls:Icon.Back}"
+                            SemanticProperties.Description="Back to projects" />
+                    <Label Text="Projects" Style="{StaticResource TextSmall}" VerticalOptions="Center" />
+                    <Label Text="/" Style="{StaticResource TextSmall}" VerticalOptions="Center" Opacity="0.5" />
+                    <Label Text="{Binding Project.Code}" Style="{StaticResource TextCode}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+                <Label Text="{Binding Project.Name}" Style="{StaticResource TextH1}" Margin="0,4,0,0" />
+                <Label Text="{Binding ProjectSubtitle}" Style="{StaticResource TextBodyMuted}" />
+            </VerticalStackLayout>
+
+            <!-- Tab bar — Syncfusion SfTabView. RFIs/Submittals items carry a
+                 BadgeText bound to the VM's open-count so the red count badge
+                 matches React. -->
+            <tabview:SfTabView x:Name="Tabs"
+                               TabBarPlacement="Top"
+                               TabBarBackground="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                               TabBarBorderColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}"
+                               TabBarBorderThickness="0"
+                               IndicatorBackground="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}"
+                               TabBarHeight="44">
+
+                <!-- ===== Overview tab ===== -->
+                <tabview:SfTabItem x:Name="TabOverviewItem"
+                                   Header="Overview"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                                   FontSize="{StaticResource TextSmallSize}"
+                                   FontFamily="{StaticResource FontSansSemibold}">
+                    <tabview:SfTabItem.Content>
+                        <ScrollView>
+                            <VerticalStackLayout Spacing="{StaticResource SpaceXl}" Padding="0,0,0,24">
+
+                                <!-- KPI cards — 6 React-parity cards in a FlexLayout (auto-fit wrap,
+                                     mirrors React's `.kpi-grid repeat(auto-fit, minmax(220px,1fr))`). -->
+                                <FlexLayout x:Name="OverviewKpiGrid"
+                                            Direction="Row" Wrap="Wrap" JustifyContent="Start"
+                                            AlignItems="Start" AlignContent="Start"
+                                            HorizontalOptions="Fill">
+
+                                    <!-- 1. Percent Complete (with progress bar) -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="Percent Complete" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding PercentCompleteDisplay}" Style="{StaticResource TextKpiValue}" />
+                                            <Frame Style="{StaticResource ProgressTrack}" Margin="0,4,0,0">
+                                                <BoxView HeightRequest="6"
+                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Success600}, Dark={StaticResource Success500}}"
+                                                         WidthRequest="{Binding Kpis.PercentComplete}" />
+                                            </Frame>
+                                        </VerticalStackLayout>
+                                    </Border>
+
+                                    <!-- 2. Cost Variance -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Cost Variance" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding CostVarianceDisplay}" Style="{StaticResource TextKpiValue}" />
+                                            <Label Text="{Binding CostVarianceTrend}" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+
+                                    <!-- 3. Schedule Variance -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Schedule Variance" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding ScheduleVarianceDisplay}" Style="{StaticResource TextKpiValue}" />
+                                            <Label Text="{Binding ScheduleVarianceTrend}" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+
+                                    <!-- 4. Open RFIs -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Open RFIs" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding Kpis.OpenRfis}" Style="{StaticResource TextKpiValue}" />
+                                            <Label Text="{Binding RfisTrend}" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+
+                                    <!-- 5. Open Submittals -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Open Submittals" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding Kpis.OpenSubmittals}" Style="{StaticResource TextKpiValue}" />
+                                            <Label Text="{Binding SubmittalsTrend}" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+
+                                    <!-- 6. Pending Change Orders -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Pending Change Orders" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding PendingChangeOrdersAmountDisplay}" Style="{StaticResource TextKpiValue}" />
+                                            <Label Text="{Binding PendingChangeOrdersTrend}" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </FlexLayout>
+
+                                <!-- 2-column panel-grid: Upcoming Milestones (grid) + Risk Register (alert rows) -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceLg}">
+
+                                    <!-- Upcoming Milestones -->
+                                    <Border Grid.Column="0" Style="{StaticResource CardBorder}">
+                                        <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                            <VerticalStackLayout Grid.Row="0" Spacing="2">
+                                                <Label Text="Upcoming Milestones" Style="{StaticResource TextH4}" />
+                                                <Label Text="Next 30 days" Style="{StaticResource TextCaption}" />
+                                            </VerticalStackLayout>
+                                            <syncfusion:SfDataGrid Grid.Row="1" ItemsSource="{Binding UpcomingMilestones}" RowHeight="40"
+                                                                   AutoGenerateColumnsMode="None" SelectionMode="None"
+                                                                   ColumnWidthMode="Fill"
+                                                                   HorizontalOptions="Fill"
+                                                                   VerticalOptions="Fill"
+                                                                   MinimumHeightRequest="160">
+                                                <syncfusion:SfDataGrid.Columns>
+                                                    <syncfusion:DataGridTextColumn MappingName="Title" HeaderText="Milestone" />
+                                                    <syncfusion:DataGridTextColumn MappingName="PlannedDate" HeaderText="Date" />
+                                                    <syncfusion:DataGridTextColumn MappingName="Status" HeaderText="Status" />
+                                                </syncfusion:SfDataGrid.Columns>
+                                            </syncfusion:SfDataGrid>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Risk Register — alert-styled rows by severity + empty state -->
+                                    <Border Grid.Column="1" Style="{StaticResource CardBorder}">
+                                        <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                            <VerticalStackLayout Grid.Row="0" Spacing="2">
+                                                <Label Text="Risk Register" Style="{StaticResource TextH4}" />
+                                                <Label Text="Top open items" Style="{StaticResource TextCaption}" />
+                                            </VerticalStackLayout>
+                                            <CollectionView Grid.Row="1" ItemsSource="{Binding TopRisks}" EmptyView="No open risks" MinimumHeightRequest="160">
+                                                <CollectionView.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:RiskDto">
+                                                        <Border Padding="12,10,12,10" Margin="0,0,0,8"
+                                                                Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray800}}"
+                                                                StrokeShape="RoundRectangle 8"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource Warning50}, Dark={StaticResource Warning950}}">
+                                                            <HorizontalStackLayout Spacing="10">
+                                                                <Image Source="{x:Static controls:Icon.Risks}" VerticalOptions="Start" />
+                                                                <VerticalStackLayout Spacing="2">
+                                                                    <Label Text="{Binding Title}" Style="{StaticResource TextSmall}" FontAttributes="Bold" />
+                                                                    <Label Text="{Binding ImpactDisplay}" Style="{StaticResource TextCaption}" />
+                                                                </VerticalStackLayout>
+                                                            </HorizontalStackLayout>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </CollectionView.ItemTemplate>
+                                            </CollectionView>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Document Workflow — grid (row tap opens the sample PDF viewer via OnDocumentSelected) -->
+                                <Border Style="{StaticResource CardBorder}">
+                                    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                                            <Label Text="Document Workflow" Style="{StaticResource TextH4}" />
+                                            <Label Text="{Binding Project.Code, StringFormat='Last 30 days · {0}'}" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                        <CollectionView Grid.Row="1" ItemsSource="{Binding RecentDocuments}" SelectionMode="Single" SelectionChanged="OnDocumentSelected" MinimumHeightRequest="200">
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate x:DataType="models:RecentDocumentDto">
+                                                    <Grid ColumnDefinitions="*,120,90,120,120" ColumnSpacing="{StaticResource SpaceMd}" Padding="0,10,0,10">
+                                                        <BoxView HeightRequest="1" VerticalOptions="End" Grid.ColumnSpan="5"
+                                                                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+                                                        <Label Grid.Column="0" Text="{Binding Title}" Style="{StaticResource TextSmall}" LineBreakMode="TailTruncation" MaxLines="1" />
+                                                        <Label Grid.Column="1" Text="{Binding Type}" Style="{StaticResource TextCaption}" />
+                                                        <Label Grid.Column="2" Text="{Binding Revision}" Style="{StaticResource TextCode}" />
+                                                        <Label Grid.Column="3" Text="{Binding SubmittedDate, StringFormat='{0:MMM d, yyyy}'}" Style="{StaticResource TextCaption}" />
+                                                        <Label Grid.Column="4" Text="{Binding Status}" Style="{StaticResource BadgeNeutral}" HorizontalOptions="Start" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Project Details — meta-list card -->
+                                <Border Style="{StaticResource CardBorder}">
+                                    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                                            <Label Text="Project Details" Style="{StaticResource TextH4}" />
+                                            <Label Text="General information" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                        <VerticalStackLayout Grid.Row="1" Spacing="0">
+                                            <!-- Status -->
+                                            <Grid ColumnDefinitions="160,*" Padding="0,10,0,10">
+                                                <Label Grid.Column="0" Text="Status" Style="{StaticResource TextCaption}" />
+                                                <Label Grid.Column="1" Text="{Binding Project.Status}" Style="{StaticResource BadgeNeutral}" HorizontalOptions="Start" />
+                                            </Grid>
+                                            <BoxView HeightRequest="1" BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+                                            <!-- Health -->
+                                            <Grid ColumnDefinitions="160,*" Padding="0,10,0,10">
+                                                <Label Grid.Column="0" Text="Health" Style="{StaticResource TextCaption}" />
+                                                <Label Grid.Column="1" Text="{Binding Project.HealthStatus}" Style="{StaticResource BadgeWarning}" HorizontalOptions="Start" />
+                                            </Grid>
+                                            <BoxView HeightRequest="1" BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+                                            <!-- Project Manager -->
+                                            <Grid ColumnDefinitions="160,*" Padding="0,10,0,10">
+                                                <Label Grid.Column="0" Text="Project Manager" Style="{StaticResource TextCaption}" />
+                                                <Label Grid.Column="1" Text="{Binding Project.Manager}" Style="{StaticResource TextSmall}" />
+                                            </Grid>
+                                            <BoxView HeightRequest="1" BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+                                            <!-- Duration -->
+                                            <Grid ColumnDefinitions="160,*" Padding="0,10,0,10">
+                                                <Label Grid.Column="0" Text="Duration" Style="{StaticResource TextCaption}" />
+                                                <Label Grid.Column="1" Text="{Binding DurationDisplay}" Style="{StaticResource TextSmall}" />
+                                            </Grid>
+                                            <BoxView HeightRequest="1" BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+                                            <!-- Location -->
+                                            <Grid ColumnDefinitions="160,*" Padding="0,10,0,10">
+                                                <Label Grid.Column="0" Text="Location" Style="{StaticResource TextCaption}" />
+                                                <Label Grid.Column="1" Text="{Binding Project.Location}" Style="{StaticResource TextSmall}" />
+                                            </Grid>
+                                            <BoxView HeightRequest="1" BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+                                            <!-- Budget -->
+                                            <Grid ColumnDefinitions="160,*" Padding="0,10,0,10">
+                                                <Label Grid.Column="0" Text="Budget" Style="{StaticResource TextCaption}" />
+                                                <Label Grid.Column="1" Text="{Binding Project.Budget, StringFormat='{0:C0}'}" Style="{StaticResource TextSmall}" />
+                                            </Grid>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Border>
+
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </tabview:SfTabItem.Content>
+                </tabview:SfTabItem>
+
+                <!-- ===== Schedule tab ===== — milestones grid (Milestone/Description/Planned Date/Status/Owner) -->
+                <tabview:SfTabItem x:Name="TabScheduleItem"
+                                   Header="Schedule"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                                   FontSize="{StaticResource TextSmallSize}"
+                                   FontFamily="{StaticResource FontSansSemibold}">
+                    <tabview:SfTabItem.Content>
+                        <Border Style="{StaticResource CardBorder}">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                <Label Grid.Row="0" Text="Milestones" Style="{StaticResource TextH4}" />
+                                <syncfusion:SfDataGrid Grid.Row="1" ItemsSource="{Binding UpcomingMilestones}" RowHeight="40"
+                                                       AutoGenerateColumnsMode="None" SelectionMode="None"
+                                                       ColumnWidthMode="Fill"
+                                                       HorizontalOptions="Fill"
+                                                       VerticalOptions="Fill">
+                                    <syncfusion:SfDataGrid.Columns>
+                                        <syncfusion:DataGridTextColumn MappingName="Title" HeaderText="Milestone" />
+                                        <syncfusion:DataGridTextColumn MappingName="Description" HeaderText="Description" />
+                                        <syncfusion:DataGridTextColumn MappingName="PlannedDate" HeaderText="Planned Date" />
+                                        <syncfusion:DataGridTextColumn MappingName="Status" HeaderText="Status" />
+                                        <syncfusion:DataGridTextColumn MappingName="Owner" HeaderText="Owner" />
+                                    </syncfusion:SfDataGrid.Columns>
+                                </syncfusion:SfDataGrid>
+                            </Grid>
+                        </Border>
+                    </tabview:SfTabItem.Content>
+                </tabview:SfTabItem>
+
+                <!-- ===== Cost tab ===== — 4 React-parity KPIs + Change Orders grid -->
+                <tabview:SfTabItem x:Name="TabCostItem"
+                                   Header="Cost"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                                   FontSize="{StaticResource TextSmallSize}"
+                                   FontFamily="{StaticResource FontSansSemibold}">
+                    <tabview:SfTabItem.Content>
+                        <ScrollView>
+                            <VerticalStackLayout Spacing="{StaticResource SpaceXl}" Padding="0,0,0,24">
+                                <FlexLayout x:Name="CostKpiGrid"
+                                            Direction="Row" Wrap="Wrap" JustifyContent="Start"
+                                            AlignItems="Start" AlignContent="Start"
+                                            HorizontalOptions="Fill">
+                                    <!-- Budget -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Budget" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding BudgetDisplay}" Style="{StaticResource TextKpiValue}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <!-- Spent (progress bar) -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label Text="Spent" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding SpentDisplay}" Style="{StaticResource TextKpiValue}" />
+                                            <Frame Style="{StaticResource ProgressTrack}" Margin="0,4,0,0">
+                                                <BoxView HeightRequest="6"
+                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Success600}, Dark={StaticResource Success500}}"
+                                                         WidthRequest="{Binding SpentPercent}" />
+                                            </Frame>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <!-- Cost Variance -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Cost Variance" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding CostVarianceDisplay}" Style="{StaticResource TextKpiValue}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                    <!-- Pending Change Orders -->
+                                    <Border Style="{StaticResource KpiBorder}" Padding="14,14,16,14"
+                                            FlexLayout.Basis="220" FlexLayout.Grow="1" Margin="0,0,16,16">
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="Pending Change Orders" Style="{StaticResource TextCaption}" />
+                                            <Label Text="{Binding PendingChangeOrdersAmountDisplay}" Style="{StaticResource TextKpiValue}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </FlexLayout>
+
+                                <Border Style="{StaticResource CardBorder}">
+                                    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                                            <Label Text="Change Orders" Style="{StaticResource TextH4}" />
+                                            <Label Text="Pending and approved project changes" Style="{StaticResource TextCaption}" />
+                                        </VerticalStackLayout>
+                                        <syncfusion:SfDataGrid Grid.Row="1" ItemsSource="{Binding ChangeOrders}" RowHeight="40"
+                                                               AutoGenerateColumnsMode="None" SelectionMode="None"
+                                                               ColumnWidthMode="Fill"
+                                                               HorizontalOptions="Fill"
+                                                               VerticalOptions="Fill">
+                                            <syncfusion:SfDataGrid.Columns>
+                                                <syncfusion:DataGridTextColumn MappingName="Number" HeaderText="CO #" />
+                                                <syncfusion:DataGridTextColumn MappingName="Description" HeaderText="Description" />
+                                                <syncfusion:DataGridNumericColumn MappingName="Amount" HeaderText="Amount" Format="C0" />
+                                                <syncfusion:DataGridTextColumn MappingName="Status" HeaderText="Status" />
+                                                <syncfusion:DataGridTextColumn MappingName="RequestedBy" HeaderText="Requested By" />
+                                            </syncfusion:SfDataGrid.Columns>
+                                        </syncfusion:SfDataGrid>
+                                    </Grid>
+                                </Border>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                    </tabview:SfTabItem.Content>
+                </tabview:SfTabItem>
+
+                <!-- ===== RFIs tab (with open-count badge) ===== — React columns -->
+                <tabview:SfTabItem x:Name="TabRfisItem"
+                                   Header="RFIs"
+                                   BadgeText="{Binding TabBadgeRfis}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                                   FontSize="{StaticResource TextSmallSize}"
+                                   FontFamily="{StaticResource FontSansSemibold}">
+                    <tabview:SfTabItem.Content>
+                        <Border Style="{StaticResource CardBorder}">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                <Label Grid.Row="0" Text="RFIs" Style="{StaticResource TextH4}" />
+                                <syncfusion:SfDataGrid Grid.Row="1" ItemsSource="{Binding Rfis}" RowHeight="40"
+                                                       AutoGenerateColumnsMode="None" SelectionMode="None"
+                                                       ColumnWidthMode="Fill"
+                                                       HorizontalOptions="Fill"
+                                                       VerticalOptions="Fill">
+                                    <syncfusion:SfDataGrid.Columns>
+                                        <syncfusion:DataGridTextColumn MappingName="Number" HeaderText="RFI #" />
+                                        <syncfusion:DataGridTextColumn MappingName="Subject" HeaderText="Subject" />
+                                        <syncfusion:DataGridTextColumn MappingName="Discipline" HeaderText="Discipline" />
+                                        <syncfusion:DataGridTextColumn MappingName="Impact" HeaderText="Impact" />
+                                        <syncfusion:DataGridTextColumn MappingName="Status" HeaderText="Status" />
+                                        <syncfusion:DataGridTextColumn MappingName="DueDate" HeaderText="Due" />
+                                    </syncfusion:SfDataGrid.Columns>
+                                </syncfusion:SfDataGrid>
+                            </Grid>
+                        </Border>
+                    </tabview:SfTabItem.Content>
+                </tabview:SfTabItem>
+
+                <!-- ===== Submittals tab (with open-count badge) ===== — React columns -->
+                <tabview:SfTabItem x:Name="TabSubmittalsItem"
+                                   Header="Submittals"
+                                   BadgeText="{Binding TabBadgeSubmittals}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray200}}"
+                                   FontSize="{StaticResource TextSmallSize}"
+                                   FontFamily="{StaticResource FontSansSemibold}">
+                    <tabview:SfTabItem.Content>
+                        <Border Style="{StaticResource CardBorder}">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                                <Label Grid.Row="0" Text="Submittals" Style="{StaticResource TextH4}" />
+                                <syncfusion:SfDataGrid Grid.Row="1" ItemsSource="{Binding Submittals}" RowHeight="40"
+                                                       AutoGenerateColumnsMode="None" SelectionMode="None"
+                                                       ColumnWidthMode="Fill"
+                                                       HorizontalOptions="Fill"
+                                                       VerticalOptions="Fill">
+                                    <syncfusion:SfDataGrid.Columns>
+                                        <syncfusion:DataGridTextColumn MappingName="Number" HeaderText="Sub #" />
+                                        <syncfusion:DataGridTextColumn MappingName="Title" HeaderText="Title" />
+                                        <syncfusion:DataGridTextColumn MappingName="SubmittalType" HeaderText="Type" />
+                                        <syncfusion:DataGridTextColumn MappingName="Discipline" HeaderText="Discipline" />
+                                        <syncfusion:DataGridTextColumn MappingName="SpecificationSection" HeaderText="Spec Section" />
+                                        <syncfusion:DataGridTextColumn MappingName="Status" HeaderText="Status" />
+                                    </syncfusion:SfDataGrid.Columns>
+                                </syncfusion:SfDataGrid>
+                            </Grid>
+                        </Border>
+                    </tabview:SfTabItem.Content>
+                </tabview:SfTabItem>
+
+            </tabview:SfTabView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,750 @@
+{
+    "1":  [
+              {
+                  "id":  3,
+                  "projectId":  1,
+                  "projectCode":  "PRJ-P2G0SF",
+                  "title":  "Groundbreaking",
+                  "description":  "Quality control inspection completed; all findings addressed and closed out.",
+                  "plannedDate":  "2026-09-24T20:29:27.326181Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  4,
+                  "projectId":  1,
+                  "projectCode":  "PRJ-P2G0SF",
+                  "title":  "Structural Steel Erected",
+                  "description":  "Submittal review cycle in progress; approval expected within standard timeframe.",
+                  "plannedDate":  "2026-10-26T12:13:22.458399Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  5,
+                  "projectId":  1,
+                  "projectCode":  "PRJ-P2G0SF",
+                  "title":  "Building Dry-In",
+                  "description":  "Site safety audit conducted; no major deficiencies identified; minor items corrected.",
+                  "plannedDate":  "2026-11-22T22:48:56.199214Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  6,
+                  "projectId":  1,
+                  "projectCode":  "PRJ-P2G0SF",
+                  "title":  "Interior Finishes Underway",
+                  "description":  "Change order request pending review by owner\u0027s representative for scope adjustment.",
+                  "plannedDate":  "2027-01-01T09:21:46.047547Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  7,
+                  "projectId":  1,
+                  "projectCode":  "PRJ-P2G0SF",
+                  "title":  "Substantial Completion",
+                  "description":  "Commissioning tests scheduled for next phase; coordination with vendor representatives required.",
+                  "plannedDate":  "2027-01-14T03:48:44.178601Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  8,
+                  "projectId":  1,
+                  "projectCode":  "PRJ-P2G0SF",
+                  "title":  "Certificate of Occupancy",
+                  "description":  "RFI response received from design team; field verification needed before proceeding.",
+                  "plannedDate":  "2027-02-10T10:06:05.72603Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              }
+          ],
+    "2":  [
+              {
+                  "id":  11,
+                  "projectId":  2,
+                  "projectCode":  "PRJ-218C3P",
+                  "title":  "MEP Rough-In Complete",
+                  "description":  "Coordination meeting held with all subcontractors to review sequencing and conflict resolution.",
+                  "plannedDate":  "2026-11-09T15:17:55.883387Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  12,
+                  "projectId":  2,
+                  "projectCode":  "PRJ-218C3P",
+                  "title":  "Certificate of Occupancy",
+                  "description":  "Material delivery delayed due to transportation logistics; updated schedule provided.",
+                  "plannedDate":  "2027-01-06T09:48:47.371481Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              }
+          ],
+    "3":  [
+
+          ],
+    "4":  [
+              {
+                  "id":  21,
+                  "projectId":  4,
+                  "projectCode":  "PRJ-P5YM0W",
+                  "title":  "Foundation Complete",
+                  "description":  "Coordination meeting held with all subcontractors to review sequencing and conflict resolution.",
+                  "plannedDate":  "2026-09-27T03:50:05.849835Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  22,
+                  "projectId":  4,
+                  "projectCode":  "PRJ-P5YM0W",
+                  "title":  "MEP Rough-In Complete",
+                  "description":  "Material delivery delayed due to transportation logistics; updated schedule provided.",
+                  "plannedDate":  "2026-11-02T21:21:39.42336Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  23,
+                  "projectId":  4,
+                  "projectCode":  "PRJ-P5YM0W",
+                  "title":  "Certificate of Occupancy",
+                  "description":  "Quality control inspection completed; all findings addressed and closed out.",
+                  "plannedDate":  "2026-12-03T18:12:37.586158Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              }
+          ],
+    "5":  [
+
+          ],
+    "6":  [
+              {
+                  "id":  32,
+                  "projectId":  6,
+                  "projectCode":  "PRJ-AYQ2NL",
+                  "title":  "MEP Rough-In Complete",
+                  "description":  "Material delivery delayed due to transportation logistics; updated schedule provided.",
+                  "plannedDate":  "2026-10-28T16:23:27.201956Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  33,
+                  "projectId":  6,
+                  "projectCode":  "PRJ-AYQ2NL",
+                  "title":  "Certificate of Occupancy",
+                  "description":  "Quality control inspection completed; all findings addressed and closed out.",
+                  "plannedDate":  "2027-01-05T22:08:03.806618Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              }
+          ],
+    "7":  [
+              {
+                  "id":  35,
+                  "projectId":  7,
+                  "projectCode":  "PRJ-V323I5",
+                  "title":  "Permit Approval",
+                  "description":  "Site safety audit conducted; no major deficiencies identified; minor items corrected.",
+                  "plannedDate":  "2026-09-15T14:52:24.025282Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  36,
+                  "projectId":  7,
+                  "projectCode":  "PRJ-V323I5",
+                  "title":  "Foundation Complete",
+                  "description":  "Change order request pending review by owner\u0027s representative for scope adjustment.",
+                  "plannedDate":  "2026-10-08T19:39:55.448941Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  37,
+                  "projectId":  7,
+                  "projectCode":  "PRJ-V323I5",
+                  "title":  "Building Dry-In",
+                  "description":  "Commissioning tests scheduled for next phase; coordination with vendor representatives required.",
+                  "plannedDate":  "2026-10-30T10:42:04.81645Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  38,
+                  "projectId":  7,
+                  "projectCode":  "PRJ-V323I5",
+                  "title":  "MEP Rough-In Complete",
+                  "description":  "RFI response received from design team; field verification needed before proceeding.",
+                  "plannedDate":  "2026-11-10T19:10:04.831216Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  39,
+                  "projectId":  7,
+                  "projectCode":  "PRJ-V323I5",
+                  "title":  "Substantial Completion",
+                  "description":  "Pre-pour checklist completed and submitted for foundation concrete placement.",
+                  "plannedDate":  "2026-11-24T14:56:45.032889Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  40,
+                  "projectId":  7,
+                  "projectCode":  "PRJ-V323I5",
+                  "title":  "Certificate of Occupancy",
+                  "description":  "Equipment startup sequence reviewed with operations staff and startup plan approved.",
+                  "plannedDate":  "2026-12-11T18:00:27.205553Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              }
+          ],
+    "8":  [
+              {
+                  "id":  44,
+                  "projectId":  8,
+                  "projectCode":  "PRJ-Z2XVBC",
+                  "title":  "Certificate of Occupancy",
+                  "description":  "Submittal review cycle in progress; approval expected within standard timeframe.",
+                  "plannedDate":  "2026-12-11T21:02:20.994693Z",
+                  "status":  "NotStarted",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              }
+          ],
+    "9":  [
+              {
+                  "id":  49,
+                  "projectId":  9,
+                  "projectCode":  "PRJ-IR96ZH",
+                  "title":  "Substantial Completion",
+                  "description":  "Pre-pour checklist completed and submitted for foundation concrete placement.",
+                  "plannedDate":  "2026-10-18T03:25:42.857142Z",
+                  "status":  "Completed",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              },
+              {
+                  "id":  50,
+                  "projectId":  9,
+                  "projectCode":  "PRJ-IR96ZH",
+                  "title":  "Certificate of Occupancy",
+                  "description":  "Equipment startup sequence reviewed with operations staff and startup plan approved.",
+                  "plannedDate":  "2026-12-10T13:42:51.428571Z",
+                  "status":  "Cancelled",
+                  "owner":  "Jordan Cummings",
+                  "floatDays":  0,
+                  "type":  null,
+                  "createdDate":  "0001-01-01T00:00:00",
+                  "modifiedDate":  null
+              }
+          ],
+    "10":  [
+               {
+                   "id":  52,
+                   "projectId":  10,
+                   "projectCode":  "PRJ-7ZORDN",
+                   "title":  "Permit Approval",
+                   "description":  "Material delivery delayed due to transportation logistics; updated schedule provided.",
+                   "plannedDate":  "2026-09-17T12:50:15.433597Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  53,
+                   "projectId":  10,
+                   "projectCode":  "PRJ-7ZORDN",
+                   "title":  "Foundation Complete",
+                   "description":  "Quality control inspection completed; all findings addressed and closed out.",
+                   "plannedDate":  "2026-10-07T23:00:45.327874Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  54,
+                   "projectId":  10,
+                   "projectCode":  "PRJ-7ZORDN",
+                   "title":  "MEP Rough-In Complete",
+                   "description":  "Submittal review cycle in progress; approval expected within standard timeframe.",
+                   "plannedDate":  "2026-10-21T05:54:02.749036Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  55,
+                   "projectId":  10,
+                   "projectCode":  "PRJ-7ZORDN",
+                   "title":  "Substantial Completion",
+                   "description":  "Site safety audit conducted; no major deficiencies identified; minor items corrected.",
+                   "plannedDate":  "2026-11-09T21:19:55.663568Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  56,
+                   "projectId":  10,
+                   "projectCode":  "PRJ-7ZORDN",
+                   "title":  "Certificate of Occupancy",
+                   "description":  "Change order request pending review by owner\u0027s representative for scope adjustment.",
+                   "plannedDate":  "2026-11-24T08:35:17.996374Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               }
+           ],
+    "11":  [
+               {
+                   "id":  59,
+                   "projectId":  11,
+                   "projectCode":  "PRJ-1R4CGS",
+                   "title":  "Foundation Complete",
+                   "description":  "Pre-pour checklist completed and submitted for foundation concrete placement.",
+                   "plannedDate":  "2026-09-23T22:16:13.078193Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  60,
+                   "projectId":  11,
+                   "projectCode":  "PRJ-1R4CGS",
+                   "title":  "MEP Rough-In Complete",
+                   "description":  "Equipment startup sequence reviewed with operations staff and startup plan approved.",
+                   "plannedDate":  "2026-10-27T09:35:24.051608Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  61,
+                   "projectId":  11,
+                   "projectCode":  "PRJ-1R4CGS",
+                   "title":  "Substantial Completion",
+                   "description":  "Coordination meeting held with all subcontractors to review sequencing and conflict resolution.",
+                   "plannedDate":  "2026-11-16T02:32:44.069926Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  62,
+                   "projectId":  11,
+                   "projectCode":  "PRJ-1R4CGS",
+                   "title":  "Certificate of Occupancy",
+                   "description":  "Material delivery delayed due to transportation logistics; updated schedule provided.",
+                   "plannedDate":  "2026-12-18T20:29:12.571463Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               }
+           ],
+    "12":  [
+
+           ],
+    "13":  [
+
+           ],
+    "14":  [
+
+           ],
+    "15":  [
+
+           ],
+    "16":  [
+
+           ],
+    "17":  [
+
+           ],
+    "18":  [
+               {
+                   "id":  105,
+                   "projectId":  18,
+                   "projectCode":  "PRJ-Z62G2H",
+                   "title":  "MEP Rough-In Complete",
+                   "description":  "Site safety audit conducted; no major deficiencies identified; minor items corrected.",
+                   "plannedDate":  "2026-10-09T09:04:04.056957Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  106,
+                   "projectId":  18,
+                   "projectCode":  "PRJ-Z62G2H",
+                   "title":  "Substantial Completion",
+                   "description":  "Change order request pending review by owner\u0027s representative for scope adjustment.",
+                   "plannedDate":  "2026-11-12T00:42:43.365431Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  107,
+                   "projectId":  18,
+                   "projectCode":  "PRJ-Z62G2H",
+                   "title":  "Certificate of Occupancy",
+                   "description":  "Commissioning tests scheduled for next phase; coordination with vendor representatives required.",
+                   "plannedDate":  "2026-12-31T21:09:33.131628Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               }
+           ],
+    "19":  [
+
+           ],
+    "20":  [
+               {
+                   "id":  115,
+                   "projectId":  20,
+                   "projectCode":  "PRJ-2NZBT4",
+                   "title":  "Building Dry-In",
+                   "description":  "Site safety audit conducted; no major deficiencies identified; minor items corrected.",
+                   "plannedDate":  "2026-09-16T17:33:01.388082Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  116,
+                   "projectId":  20,
+                   "projectCode":  "PRJ-2NZBT4",
+                   "title":  "MEP Rough-In Complete",
+                   "description":  "Change order request pending review by owner\u0027s representative for scope adjustment.",
+                   "plannedDate":  "2026-10-04T20:33:36.420365Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  117,
+                   "projectId":  20,
+                   "projectCode":  "PRJ-2NZBT4",
+                   "title":  "Substantial Completion",
+                   "description":  "Commissioning tests scheduled for next phase; coordination with vendor representatives required.",
+                   "plannedDate":  "2026-10-27T21:14:01.552776Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  118,
+                   "projectId":  20,
+                   "projectCode":  "PRJ-2NZBT4",
+                   "title":  "Certificate of Occupancy",
+                   "description":  "RFI response received from design team; field verification needed before proceeding.",
+                   "plannedDate":  "2026-11-24T03:26:13.55626Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               }
+           ],
+    "21":  [
+
+           ],
+    "22":  [
+               {
+                   "id":  127,
+                   "projectId":  22,
+                   "projectCode":  "PRJ-4RLDYE",
+                   "title":  "Permit Approval",
+                   "description":  "Commissioning tests scheduled for next phase; coordination with vendor representatives required.",
+                   "plannedDate":  "2026-10-03T11:39:28.980387Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  128,
+                   "projectId":  22,
+                   "projectCode":  "PRJ-4RLDYE",
+                   "title":  "Foundation Complete",
+                   "description":  "RFI response received from design team; field verification needed before proceeding.",
+                   "plannedDate":  "2026-11-17T04:45:21.255091Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  129,
+                   "projectId":  22,
+                   "projectCode":  "PRJ-4RLDYE",
+                   "title":  "Building Dry-In",
+                   "description":  "Pre-pour checklist completed and submitted for foundation concrete placement.",
+                   "plannedDate":  "2026-12-25T20:49:38.306597Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  130,
+                   "projectId":  22,
+                   "projectCode":  "PRJ-4RLDYE",
+                   "title":  "MEP Rough-In Complete",
+                   "description":  "Equipment startup sequence reviewed with operations staff and startup plan approved.",
+                   "plannedDate":  "2027-02-02T09:33:26.605257Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  131,
+                   "projectId":  22,
+                   "projectCode":  "PRJ-4RLDYE",
+                   "title":  "Substantial Completion",
+                   "description":  "Coordination meeting held with all subcontractors to review sequencing and conflict resolution.",
+                   "plannedDate":  "2027-03-07T19:44:45.43485Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  132,
+                   "projectId":  22,
+                   "projectCode":  "PRJ-4RLDYE",
+                   "title":  "Certificate of Occupancy",
+                   "description":  "Material delivery delayed due to transportation logistics; updated schedule provided.",
+                   "plannedDate":  "2027-03-25T09:09:32.926511Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               }
+           ],
+    "23":  [
+               {
+                   "id":  136,
+                   "projectId":  23,
+                   "projectCode":  "PRJ-LJ351J",
+                   "title":  "Structural Steel Erected",
+                   "description":  "Change order request pending review by owner\u0027s representative for scope adjustment.",
+                   "plannedDate":  "2026-09-16T01:24:14.06509Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  137,
+                   "projectId":  23,
+                   "projectCode":  "PRJ-LJ351J",
+                   "title":  "Building Dry-In",
+                   "description":  "Commissioning tests scheduled for next phase; coordination with vendor representatives required.",
+                   "plannedDate":  "2026-10-02T06:16:06.891672Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  138,
+                   "projectId":  23,
+                   "projectCode":  "PRJ-LJ351J",
+                   "title":  "Interior Finishes Underway",
+                   "description":  "RFI response received from design team; field verification needed before proceeding.",
+                   "plannedDate":  "2026-10-20T23:40:05.27637Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  139,
+                   "projectId":  23,
+                   "projectCode":  "PRJ-LJ351J",
+                   "title":  "Substantial Completion",
+                   "description":  "Pre-pour checklist completed and submitted for foundation concrete placement.",
+                   "plannedDate":  "2026-11-17T04:36:10.166344Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               },
+               {
+                   "id":  140,
+                   "projectId":  23,
+                   "projectCode":  "PRJ-LJ351J",
+                   "title":  "Certificate of Occupancy",
+                   "description":  "Equipment startup sequence reviewed with operations staff and startup plan approved.",
+                   "plannedDate":  "2026-11-29T14:15:17.105391Z",
+                   "status":  "NotStarted",
+                   "owner":  "Jordan Cummings",
+                   "floatDays":  0,
+                   "type":  null,
+                   "createdDate":  "0001-01-01T00:00:00",
+                   "modifiedDate":  null
+               }
+           ],
+    "24":  [
+
+           ],
+    "25":  [
+
+           ]
+}

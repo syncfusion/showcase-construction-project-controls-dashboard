@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Reports screen — mirrors the React/Blazor ReportsPage: an Earned Value
+     Trend multi-series line chart (BCWS/BCWP/ACWP over 12 months) and a Cost
+     Variance by Cost Code column chart. Both bind to ReportsViewModel. -->
+<controls:ScreenBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:controls="clr-namespace:Construction.Maui.Controls"
+                     xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+                     xmlns:vm="clr-namespace:Construction.Maui.ViewModels"
+                     x:Class="Construction.Maui.Views.ReportsPage"
+                     x:DataType="vm:ReportsViewModel"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+             NavigationPage.HasNavigationBar="False">
+
+    <ScrollView Padding="{StaticResource PagePadding}">
+        <VerticalStackLayout Spacing="{StaticResource SpaceXl}" MaximumWidthRequest="{StaticResource ContentMaxWidth}">
+
+            <!-- Header -->
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Reports" Style="{StaticResource TextH1}" />
+                <Label Text="Historical trends, filters, and export-ready dashboards."
+                       Style="{StaticResource TextBodyMuted}" />
+            </VerticalStackLayout>
+
+            <!-- Loading / Error states -->
+            <ActivityIndicator IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" />
+            <Border IsVisible="{Binding HasError}" Style="{StaticResource CardBorder}"
+                    Stroke="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}">
+                <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}" />
+            </Border>
+
+            <!-- Charts grid -->
+            <Grid IsVisible="{Binding HasData}" RowDefinitions="Auto,Auto" RowSpacing="{StaticResource SpaceXl}">
+
+                <!-- Earned Value Trend (multi-series line chart) -->
+                <Border Grid.Row="0" Style="{StaticResource CardBorder}">
+                    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                            <Label Text="Earned Value Trend" Style="{StaticResource TextH4}" />
+                            <Label Text="Planned Value (BCWS) vs Earned Value (BCWP) vs Actual Cost (ACWP)"
+                                   Style="{StaticResource TextCaption}" />
+                        </VerticalStackLayout>
+                        <chart:SfCartesianChart Grid.Row="1" HeightRequest="360">
+                            <chart:SfCartesianChart.Legend>
+                                <chart:ChartLegend />
+                            </chart:SfCartesianChart.Legend>
+                            <chart:SfCartesianChart.XAxes>
+                                <chart:CategoryAxis>
+                                    <chart:CategoryAxis.Title>
+                                        <chart:ChartAxisTitle Text="Month" />
+                                    </chart:CategoryAxis.Title>
+                                </chart:CategoryAxis>
+                            </chart:SfCartesianChart.XAxes>
+                            <chart:SfCartesianChart.YAxes>
+                                <chart:NumericalAxis>
+                                    <chart:NumericalAxis.Title>
+                                        <chart:ChartAxisTitle Text="Value ($)" />
+                                    </chart:NumericalAxis.Title>
+                                </chart:NumericalAxis>
+                            </chart:SfCartesianChart.YAxes>
+                            <chart:SfCartesianChart.Series>
+                                <chart:LineSeries Label="Planned Value (BCWS)"
+                                                  ItemsSource="{Binding EarnedValueTrend}"
+                                                  XBindingPath="Month" YBindingPath="Bcws"
+                                                  Fill="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}"
+                                                  StrokeWidth="2"
+                                                  EnableTooltip="True" />
+                                <chart:LineSeries Label="Earned Value (BCWP)"
+                                                  ItemsSource="{Binding EarnedValueTrend}"
+                                                  XBindingPath="Month" YBindingPath="Bcwp"
+                                                  Fill="{AppThemeBinding Light={StaticResource Success600}, Dark={StaticResource Success500}}"
+                                                  StrokeWidth="2"
+                                                  EnableTooltip="True" />
+                                <chart:LineSeries Label="Actual Cost (ACWP)"
+                                                  ItemsSource="{Binding EarnedValueTrend}"
+                                                  XBindingPath="Month" YBindingPath="Acwp"
+                                                  Fill="{AppThemeBinding Light={StaticResource Warning600}, Dark={StaticResource Warning500}}"
+                                                  StrokeWidth="2"
+                                                  EnableTooltip="True" />
+                            </chart:SfCartesianChart.Series>
+                        </chart:SfCartesianChart>
+                    </Grid>
+                </Border>
+
+                <!-- Cost Variance by Cost Code (column chart) -->
+                <Border Grid.Row="1" Style="{StaticResource CardBorder}">
+                    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                        <VerticalStackLayout Grid.Row="0" Spacing="2">
+                            <Label Text="Cost Variance by Cost Code" Style="{StaticResource TextH4}" />
+                            <Label Text="Variance % per cost code (negative = over budget)"
+                                   Style="{StaticResource TextCaption}" />
+                        </VerticalStackLayout>
+                        <chart:SfCartesianChart Grid.Row="1" HeightRequest="360">
+                            <chart:SfCartesianChart.XAxes>
+                                <chart:CategoryAxis>
+                                    <chart:CategoryAxis.Title>
+                                        <chart:ChartAxisTitle Text="Cost Code" />
+                                    </chart:CategoryAxis.Title>
+                                </chart:CategoryAxis>
+                            </chart:SfCartesianChart.XAxes>
+                            <chart:SfCartesianChart.YAxes>
+                                <chart:NumericalAxis>
+                                    <chart:NumericalAxis.Title>
+                                        <chart:ChartAxisTitle Text="Variance (%)" />
+                                    </chart:NumericalAxis.Title>
+                                </chart:NumericalAxis>
+                            </chart:SfCartesianChart.YAxes>
+                            <chart:SfCartesianChart.Series>
+                                <chart:ColumnSeries Label="Variance %"
+                                                    ItemsSource="{Binding CostVarianceByCode}"
+                                                    XBindingPath="CostCode" YBindingPath="VariancePct"
+                                                    Fill="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}"
+                                                    EnableTooltip="True" />
+                            </chart:SfCartesianChart.Series>
+                        </chart:SfCartesianChart>
+                    </Grid>
+                </Border>
+            </Grid>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</controls:ScreenBase>

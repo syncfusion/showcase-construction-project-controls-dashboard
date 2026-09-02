@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Construction Project Controls — design tokens ported from .designs/tokens.css.
+     Only primitive Color scales are defined here. Semantic tokens (Fg*, Bg*, Border*)
+     are NOT defined as AppThemeColor because MAUI's SourceGen inflator does not
+     support it. Instead consumers use AppThemeBinding with explicit light/dark
+     primitive pairs, e.g. TextColor="{AppThemeBinding Light={StaticResource Gray900},
+     Dark={StaticResource Gray100}}". Brand = #2563EB (same scale as React/Blazor ports). -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ===================== Primitive color scales ===================== -->
+    <!-- Brand blue -->
+    <Color x:Key="Brand25">#F5F8FF</Color>
+    <Color x:Key="Brand50">#EAF1FE</Color>
+    <Color x:Key="Brand100">#D6E4FD</Color>
+    <Color x:Key="Brand200">#AEC8FC</Color>
+    <Color x:Key="Brand300">#85A9F9</Color>
+    <Color x:Key="Brand400">#5D8BF4</Color>
+    <Color x:Key="Brand500">#3B71ED</Color>
+    <Color x:Key="Brand600">#2563EB</Color>
+    <Color x:Key="Brand700">#1D4EC5</Color>
+    <Color x:Key="Brand800">#1A3F9E</Color>
+    <Color x:Key="Brand900">#17357D</Color>
+    <Color x:Key="Brand950">#11214D</Color>
+
+    <!-- Gray scale -->
+    <Color x:Key="Gray25">#FCFCFD</Color>
+    <Color x:Key="Gray50">#F9FAFB</Color>
+    <Color x:Key="Gray100">#F2F4F7</Color>
+    <Color x:Key="Gray200">#EAECF0</Color>
+    <Color x:Key="Gray300">#D0D5DD</Color>
+    <Color x:Key="Gray400">#98A1B2</Color>
+    <Color x:Key="Gray500">#667085</Color>
+    <Color x:Key="Gray600">#475467</Color>
+    <Color x:Key="Gray700">#344054</Color>
+    <Color x:Key="Gray800">#18212F</Color>
+    <Color x:Key="Gray900">#101828</Color>
+    <Color x:Key="Gray950">#0C111D</Color>
+
+    <!-- Status: Error -->
+    <Color x:Key="Error50">#FEF3F2</Color>
+    <Color x:Key="Error100">#FEE4E2</Color>
+    <Color x:Key="Error500">#F04437</Color>
+    <Color x:Key="Error600">#D92C20</Color>
+    <Color x:Key="Error700">#B42318</Color>
+    <Color x:Key="Error950">#55160C</Color>
+
+    <!-- Status: Warning -->
+    <Color x:Key="Warning50">#FFFAEB</Color>
+    <Color x:Key="Warning100">#FEF0C7</Color>
+    <Color x:Key="Warning500">#F79009</Color>
+    <Color x:Key="Warning600">#DC6803</Color>
+    <Color x:Key="Warning950">#4E1D08</Color>
+
+    <!-- Status: Success -->
+    <Color x:Key="Success50">#ECFDF3</Color>
+    <Color x:Key="Success100">#D1FADF</Color>
+    <Color x:Key="Success500">#12B76A</Color>
+    <Color x:Key="Success600">#039855</Color>
+    <Color x:Key="Success950">#053321</Color>
+
+    <!-- Status: Info (Cyan) -->
+    <Color x:Key="Cyan50">#ECFDFF</Color>
+    <Color x:Key="Cyan100">#CFF9FE</Color>
+    <Color x:Key="Cyan500">#06AED4</Color>
+    <Color x:Key="Cyan700">#0E7090</Color>
+    <Color x:Key="Cyan950">#0D2D3A</Color>
+
+    <!-- Base -->
+    <Color x:Key="White">#FFFFFF</Color>
+    <Color x:Key="Black">#000000</Color>
+
+</ResourceDictionary>

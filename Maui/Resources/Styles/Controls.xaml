@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Implicit + named component styles ported from .designs tokens and the
+     Blazor app.css. Covers Button (variants), Card/Frame, KPI card, Badge Label,
+     Progress bar BoxView. Views reference these by Style key or implicitly. -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:maui="http://schemas.microsoft.com/dotnet/2021/maui">
+
+    <!-- ============ Buttons ============ -->
+    <!-- Implicit style applied to all Button controls; also keyed as ButtonBase
+         so derived styles can reference it without nested {x:Type} markup
+         (MAUI SourceGen does not support BasedOn="{StaticResource {x:Type Button}}"). -->
+    <Style x:Key="ButtonBase" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextSmallSize}" />
+        <Setter Property="Padding" Value="{StaticResource ButtonPaddingMd}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMd}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="HeightRequest" Value="40" />
+    </Style>
+    <!-- Also register as implicit (keyless) so unstyled Buttons inherit it. -->
+    <Style TargetType="Button" BasedOn="{StaticResource ButtonBase}" />
+
+    <Style x:Key="ButtonPrimary" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+    </Style>
+
+    <Style x:Key="ButtonSecondary" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray800}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+        <Setter Property="BorderWidth" Value="1" />
+    </Style>
+
+    <Style x:Key="ButtonGhost" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}" />
+    </Style>
+
+    <Style x:Key="ButtonIcon" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="Padding" Value="8,8,8,8" />
+        <Setter Property="WidthRequest" Value="40" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMd}" />
+    </Style>
+
+    <Style x:Key="ButtonSm" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Padding" Value="{StaticResource ButtonPaddingSm}" />
+        <Setter Property="FontSize" Value="{StaticResource TextCaptionSize}" />
+        <Setter Property="HeightRequest" Value="32" />
+    </Style>
+
+    <!-- ============ Border as Card (Border replaces obsolete Frame) ============ -->
+    <!-- BorderBase: shared card surface — background, stroke, corner radius, shadow.
+         NOTE: StrokeShape must be set via element syntax (RoundRectangle with an
+         explicit CornerRadius) rather than the inline "RoundRectangle <token>" string
+         form — the StrokeShapeTypeConverter cannot expand {StaticResource} inside the
+         composite string at runtime (it throws InvalidOperationException for the
+         literal "{StaticResource RadiusLg}" token). -->
+    <Style x:Key="BorderBase" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource RadiusLg}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+        <Setter Property="Shadow">
+            <Setter.Value>
+                <Shadow Brush="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Black}}"
+                       Radius="8" Offset="0,2" Opacity="0.08" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!-- Implicit style for any unstyled Border. -->
+    <Style TargetType="Border" BasedOn="{StaticResource BorderBase}" />
+
+    <!-- Card surface — same as BorderBase; kept as a separate key for semantic clarity. -->
+    <Style x:Key="CardBorder" TargetType="Border" BasedOn="{StaticResource BorderBase}">
+        <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+    </Style>
+
+    <!-- KPI card — compact padding + rounded corners. -->
+    <Style x:Key="KpiBorder" TargetType="Border" BasedOn="{StaticResource BorderBase}">
+        <Setter Property="Padding" Value="{StaticResource KpiPadding}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource RadiusLg}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============ Legacy Frame styles (kept for back-compat, no longer used) ============ -->
+    <!-- NOTE: Frame is obsolete in .NET 9+. Use Border-based styles (above) instead.
+         These styles are retained so any un-migrated XAML still compiles. -->
+    <Style x:Key="FrameBase" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLg}" />
+        <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+        <Setter Property="HasShadow" Value="True" />
+    </Style>
+    <Style TargetType="Frame" BasedOn="{StaticResource FrameBase}" />
+
+    <Style x:Key="CardFrame" TargetType="Frame" BasedOn="{StaticResource FrameBase}">
+        <Setter Property="Padding" Value="{StaticResource CardPadding}" />
+    </Style>
+
+    <Style x:Key="KpiCard" TargetType="Frame" BasedOn="{StaticResource FrameBase}">
+        <Setter Property="Padding" Value="{StaticResource KpiPadding}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusLg}" />
+    </Style>
+
+    <!-- ============ Badge labels ============ -->
+    <Style x:Key="BadgeBase" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+        <Setter Property="FontSize" Value="{StaticResource TextMicroSize}" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+        <Setter Property="Padding" Value="8,3,8,3" />
+    </Style>
+    <Style x:Key="BadgeSuccess" TargetType="Label" BasedOn="{StaticResource BadgeBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Success50}, Dark={StaticResource Success950}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Success600}, Dark={StaticResource Success500}}" />
+    </Style>
+    <Style x:Key="BadgeWarning" TargetType="Label" BasedOn="{StaticResource BadgeBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Warning50}, Dark={StaticResource Warning950}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Warning600}, Dark={StaticResource Warning500}}" />
+    </Style>
+    <Style x:Key="BadgeError" TargetType="Label" BasedOn="{StaticResource BadgeBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Error50}, Dark={StaticResource Error950}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}" />
+    </Style>
+    <Style x:Key="BadgeInfo" TargetType="Label" BasedOn="{StaticResource BadgeBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Cyan50}, Dark={StaticResource Cyan950}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Cyan700}, Dark={StaticResource Cyan500}}" />
+    </Style>
+    <Style x:Key="BadgeNeutral" TargetType="Label" BasedOn="{StaticResource BadgeBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+    </Style>
+    <Style x:Key="BadgeBrand" TargetType="Label" BasedOn="{StaticResource BadgeBase}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Brand50}, Dark={StaticResource Gray900}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}" />
+    </Style>
+
+    <!-- ============ Progress bar (BoxView inside a Grid track) ============ -->
+    <Style x:Key="ProgressTrack" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusFull}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="HeightRequest" Value="6" />
+    </Style>
+
+    <!-- ============ Entry inputs ============ -->
+    <Style TargetType="Entry">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextSmallSize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray500}}" />
+    </Style>
+
+    <Style TargetType="Picker">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextSmallSize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+        <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+    </Style>
+
+    <Style TargetType="SearchBar">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextSmallSize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray500}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}" />
+    </Style>
+
+    <!-- ============ ScrollView / ContentPage baseline ============ -->
+    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}" />
+    </Style>
+
+    <Style TargetType="ScrollView">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+    </Style>
+
+    <!-- ============ Tab button (used by ProjectDetailPage tab bar) ============ -->
+    <Style x:Key="TabButton" TargetType="Button" BasedOn="{StaticResource ButtonBase}">
+        <Setter Property="Padding" Value="16,8,16,8" />
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource RadiusMd}" />
+        <Setter Property="HeightRequest" Value="36" />
+    </Style>
+
+</ResourceDictionary>

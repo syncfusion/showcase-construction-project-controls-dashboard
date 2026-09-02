@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Lightweight styled "Coming soon" placeholder for P1/P2 nav items
+     (Site Map, Calendar, Documents, Contractors, Workflows, Reports)
+     so the sidebar visually matches the web app without building every screen. -->
+<controls:ScreenBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:controls="clr-namespace:Construction.Maui.Controls"
+                     x:Class="Construction.Maui.Views.PlaceholderPage"
+                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}">
+    <Grid RowDefinitions="*,Auto,*" Padding="32">
+        <VerticalStackLayout Grid.Row="1" HorizontalOptions="Center" Spacing="8">
+            <Label Text="🚧" FontSize="72" HorizontalOptions="Center" />
+            <Label x:Name="TitleLabel" Style="{StaticResource TextH3}" HorizontalOptions="Center" />
+            <Label Text="This module is planned for a later phase of the MAUI port."
+                   Style="{StaticResource TextBodyMuted}"
+                   HorizontalOptions="Center" />
+        </VerticalStackLayout>
+    </Grid>
+</controls:ScreenBase>

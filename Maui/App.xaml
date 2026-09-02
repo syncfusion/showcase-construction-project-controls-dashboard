@@ -1,0 +1,38 @@
+﻿<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:conv="clr-namespace:Construction.Maui.Converters"
+             xmlns:local="clr-namespace:Construction.Maui"
+             xmlns:themes="clr-namespace:Syncfusion.Maui.Themes;assembly=Syncfusion.Maui.Core"
+             x:Class="Construction.Maui.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Syncfusion MAUI control theme (Material). Syncfusion controls (DataGrid,
+                     Cartesian/Circular Charts, TabView, PdfViewer) resolve their default look
+                     from this dictionary. Rebranded below via SyncfusionPrimaryLightColor so
+                     Syncfusion controls pick up the app's #2563EB brand blue instead of the
+                     default Material indigo. Merged FIRST so the app's own Colors/Controls
+                     dictionaries that follow can override individual keys. -->
+                <themes:SyncfusionThemeResourceDictionary x:Key="SyncfusionTheme" VisualTheme="MaterialLight" />
+
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Sizes.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Typography.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Controls.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Brand override consumed by the Syncfusion theme (badge backgrounds, selection
+                 accents, etc.). Maps the Syncfusion primary to the app's Brand600 (#2563EB) so
+                 Syncfusion controls pick up the same brand blue the rest of the UI uses. The
+                 theme's own dark-variant visuals still apply via VisualTheme switching in
+                 App.xaml.cs; this is a single static brand color (same approach the React app
+                 takes — its brand blue is identical in light and dark mode). -->
+            <Color x:Key="SyncfusionPrimaryLightColor">#2563EB</Color>
+
+            <!-- Value converters referenced from page XAML -->
+            <conv:NullToBoolConverter x:Key="NullToBoolConverter" />
+            <conv:StringEqualsConverter x:Key="StringEqualsConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Spacing / radius / layout constants ported from .designs/tokens.css.
+     MAUI Thickness via x:Double so we can reference {StaticResource SpaceLg} etc. -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Spacing scale -->
+    <x:Double x:Key="SpaceXs">4</x:Double>
+    <x:Double x:Key="SpaceSm">8</x:Double>
+    <x:Double x:Key="SpaceMd">12</x:Double>
+    <x:Double x:Key="SpaceLg">16</x:Double>
+    <x:Double x:Key="SpaceXl">24</x:Double>
+    <x:Double x:Key="Space2xl">32</x:Double>
+    <x:Double x:Key="Space3xl">48</x:Double>
+    <x:Double x:Key="Space4xl">64</x:Double>
+
+    <!-- Radii -->
+    <x:Double x:Key="RadiusSm">4</x:Double>
+    <x:Double x:Key="RadiusMd">6</x:Double>
+    <x:Double x:Key="RadiusLg">8</x:Double>
+    <x:Double x:Key="RadiusXl">12</x:Double>
+    <x:Double x:Key="RadiusFull">1000</x:Double>
+
+    <!-- Layout -->
+    <x:Double x:Key="SidebarWidth">200</x:Double>
+    <x:Double x:Key="ShellSidebarCollapsedWidth">64</x:Double>
+    <x:Double x:Key="TopbarHeight">56</x:Double>
+    <x:Double x:Key="ContentMaxWidth">1440</x:Double>
+
+    <!-- Common Thicknesses -->
+    <Thickness x:Key="PagePadding">24,16,24,24</Thickness>
+    <Thickness x:Key="CardPadding">20,20,20,20</Thickness>
+    <Thickness x:Key="KpiPadding">20,20,20,20</Thickness>
+    <Thickness x:Key="ButtonPaddingLg">20,12,20,12</Thickness>
+    <Thickness x:Key="ButtonPaddingMd">12,8,12,8</Thickness>
+    <Thickness x:Key="ButtonPaddingSm">8,4,8,4</Thickness>
+
+    <!-- Card shadow (MAUI has no direct shadow token; baked into Style via BlurRadius/Opacity) -->
+    <x:Double x:Key="ShadowRadiusSm">2</x:Double>
+    <x:Double x:Key="ShadowOpacitySm">0.06</x:Double>
+    <x:Double x:Key="ShadowOffsetY">1</x:Double>
+
+</ResourceDictionary>

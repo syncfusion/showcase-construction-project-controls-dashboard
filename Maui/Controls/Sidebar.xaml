@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Desktop-first navigation sidebar. Mirrors the React/Blazor primary nav:
+     Dashboard · Projects · Cost Control · Risks. Secondary items route to the
+     placeholder ("Coming soon") page so the menu visually matches the web app
+     without building P1/P2 screens. -->
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Construction.Maui.Controls"
+    x:Class="Construction.Maui.Controls.Sidebar"
+    x:Name="Root">
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+          x:Name="RootGrid"
+          WidthRequest="{StaticResource SidebarWidth}">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="SidebarMode">
+                <VisualState x:Name="Full">
+                    <VisualState.Setters>
+                        <Setter Property="WidthRequest" Value="{StaticResource SidebarWidth}" />
+                        <Setter Property="IsVisible" Value="True" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Rail">
+                    <VisualState.Setters>
+                        <Setter Property="WidthRequest" Value="{StaticResource ShellSidebarCollapsedWidth}" />
+                        <Setter Property="IsVisible" Value="True" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="Hidden">
+                    <VisualState.Setters>
+                        <Setter Property="WidthRequest" Value="0" />
+                        <Setter Property="IsVisible" Value="False" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <!-- Brand -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="14,16,10,16">
+            <Image Grid.Column="0"
+                   WidthRequest="24" HeightRequest="24"
+                   Source="{x:Static controls:Icon.Building}"
+                   VerticalOptions="Center" />
+            <Label Grid.Column="1"
+                   x:Name="BrandLabel"
+                   Text="Construction"
+                   Style="{StaticResource TextH4}"
+                   LineBreakMode="TailTruncation"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <!-- Nav items (defined in code-behind via NavItemsSource). Only the 4
+             primary nav items are shown — the "Management" section + its section
+             headers were removed so the sidebar lists just Dashboard · Projects ·
+             Cost Control · Risks & Issues. -->
+        <ScrollView Grid.Row="1" Padding="6,0,6,8">
+            <VerticalStackLayout Spacing="2">
+                <CollectionView x:Name="PrimaryNav"
+                                SelectionMode="Single"
+                                SelectionChanged="OnSelectionChanged"
+                                ItemsSource="{Binding PrimaryItems, Source={x:Reference Root}}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="controls:NavItem">
+                            <!-- Row background + label/icon color are bound to
+                                 NavItem.SelectionBackground / SelectionTextColor
+                                 so the active route stays highlighted even though
+                                 OnSelectionChanged resets SelectedItem to null
+                                 (the VSM Selected state was being cleared by that
+                                 reset, leaving the active row un-highlighted). -->
+                            <Grid ColumnDefinitions="Auto,*"
+                                  ColumnSpacing="10"
+                                  Padding="10,10,10,10"
+                                  BackgroundColor="{Binding SelectionBackground}">
+                                <Image Grid.Column="0"
+                                       WidthRequest="20" HeightRequest="20"
+                                       Source="{Binding Icon}"
+                                       VerticalOptions="Center" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding Label}"
+                                       FontSize="{StaticResource TextSmallSize}"
+                                       FontFamily="{StaticResource FontSans}"
+                                       TextColor="{Binding SelectionTextColor}"
+                                       LineBreakMode="TailTruncation"
+                                       VerticalOptions="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Footer (theme toggle handled in topbar; here just a status caption) -->
+        <Grid Grid.Row="2" Padding="14,10,14,14">
+            <Label x:Name="FooterLabel" Style="{StaticResource TextCaption}" Text="v1.0 · MAUI Desktop" />
+        </Grid>
+
+        <!-- Right divider border -->
+        <BoxView Grid.RowSpan="3"
+                 WidthRequest="1"
+                 HorizontalOptions="End"
+                 BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+    </Grid>
+</ContentView>

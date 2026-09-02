@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Typography tokens ported from .designs/tokens.css.
+     MAUI has no FontTracking; we approximate with standard letter-spacing values via
+     setter where supported. OpenSans is the bundled font; Lucide is the icon font.
+     On Windows, Segoe UI Variable is available as an alternative but we keep OpenSans
+     for parity with the Blazor port's font stack. -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Font families -->
+    <x:String x:Key="FontSans">OpenSansRegular</x:String>
+    <x:String x:Key="FontSansSemibold">OpenSansSemibold</x:String>
+    <x:String x:Key="FontMono">Consolas</x:String>
+    <x:String x:Key="FontIcons">Lucide</x:String>
+
+    <!-- Sizes -->
+    <x:Double x:Key="TextH1Size">36</x:Double>
+    <x:Double x:Key="TextH2Size">30</x:Double>
+    <x:Double x:Key="TextH3Size">24</x:Double>
+    <x:Double x:Key="TextH4Size">20</x:Double>
+    <x:Double x:Key="TextBodySize">16</x:Double>
+    <x:Double x:Key="TextSmallSize">14</x:Double>
+    <x:Double x:Key="TextCaptionSize">12</x:Double>
+    <x:Double x:Key="TextMicroSize">11</x:Double>
+
+    <!-- KPI display values get a larger numeric size -->
+    <x:Double x:Key="TextKpiValueSize">30</x:Double>
+
+    <!-- Named text styles (consumed by views) -->
+    <Style x:Key="TextH1" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+        <Setter Property="FontSize" Value="{StaticResource TextH1Size}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+    <Style x:Key="TextH2" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+        <Setter Property="FontSize" Value="{StaticResource TextH2Size}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+    <Style x:Key="TextH3" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+        <Setter Property="FontSize" Value="{StaticResource TextH3Size}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+    <Style x:Key="TextH4" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+        <Setter Property="FontSize" Value="{StaticResource TextH4Size}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+    <Style x:Key="TextBody" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextBodySize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+    <Style x:Key="TextBodyMuted" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextBodySize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+    </Style>
+    <Style x:Key="TextSmall" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextSmallSize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+    </Style>
+    <Style x:Key="TextCaption" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextCaptionSize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray500}}" />
+    </Style>
+    <Style x:Key="TextCode" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontMono}" />
+        <Setter Property="FontSize" Value="{StaticResource TextSmallSize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+    <Style x:Key="TextKpiValue" TargetType="Label">
+        <Setter Property="FontFamily" Value="{StaticResource FontSansSemibold}" />
+        <Setter Property="FontSize" Value="{StaticResource TextKpiValueSize}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+
+    <Style TargetType="Label" ApplyToDerivedTypes="True">
+        <Setter Property="FontFamily" Value="{StaticResource FontSans}" />
+        <Setter Property="FontSize" Value="{StaticResource TextBodySize}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray100}}" />
+    </Style>
+
+</ResourceDictionary>

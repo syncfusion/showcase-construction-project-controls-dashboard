@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Projects screen — mirrors React/Blazor ProjectsPage:
+     SearchBar + status Picker + SfDataGrid (Code/Name/Status/Progress/Budget/
+     Manager/Location). Row tap → Project Detail (via OpenProjectDetail). -->
+<controls:ScreenBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:controls="clr-namespace:Construction.Maui.Controls"
+                     xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
+                     xmlns:vm="clr-namespace:Construction.Maui.ViewModels"
+                     xmlns:models="clr-namespace:Construction.Maui.Models"
+                     x:Class="Construction.Maui.Views.ProjectsPage"
+             x:DataType="vm:ProjectsViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+             NavigationPage.HasNavigationBar="False">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="{StaticResource PagePadding}" RowSpacing="{StaticResource SpaceLg}">
+
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Spacing="2">
+            <Label Text="Projects" Style="{StaticResource TextH1}" />
+            <Label Text="Construction project portfolio with status, progress, and budget."
+                   Style="{StaticResource TextBodyMuted}" />
+        </VerticalStackLayout>
+
+        <!-- Toolbar: search + status filter -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}">
+            <SearchBar Grid.Column="0"
+                       Placeholder="Search projects by name, code, manager…"
+                       Text="{Binding SearchText}"
+                       SearchCommand="{Binding SearchCommand}" />
+            <Picker Grid.Column="1"
+                    Title="Status"
+                    ItemsSource="{Binding StatusOptions}"
+                    SelectedItem="{Binding SelectedStatus}"
+                    WidthRequest="180" />
+            <Button Grid.Column="2"
+                    Style="{StaticResource ButtonPrimary}"
+                    Text="Search"
+                    Command="{Binding SearchCommand}" />
+        </Grid>
+
+        <!-- Loading / Error -->
+        <ActivityIndicator Grid.Row="2" IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}"
+                           VerticalOptions="Center" HorizontalOptions="Center" />
+        <Border Grid.Row="2" IsVisible="{Binding HasError}" Style="{StaticResource CardBorder}"
+                Stroke="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}">
+            <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}" />
+        </Border>
+
+        <!-- DataGrid. ColumnWidthMode="Auto" sizes columns to their content; combined
+             with SfDataGrid's built-in horizontal scroll this keeps the grid usable on
+             narrow phone widths (swipe to see all columns) without compressing columns
+             to unreadable widths. This is the consistent mobile strategy across all
+             grids in the MAUI port (Phase 3, item 11). -->
+        <syncfusion:SfDataGrid Grid.Row="2"
+                               x:Name="Grid"
+                               IsVisible="{Binding HasData}"
+                               ItemsSource="{Binding Projects}"
+                               SelectionMode="Single"
+                               GridLinesVisibility="Horizontal"
+                               HeaderGridLinesVisibility="Horizontal"
+                               AutoGenerateColumnsMode="None"
+                               ColumnWidthMode="Auto"
+                               RowHeight="44"
+                               HeaderRowHeight="44"
+                               SelectionChanged="OnGridSelectionChanged">
+            <syncfusion:SfDataGrid.Columns>
+                <syncfusion:DataGridTextColumn MappingName="Code" HeaderText="Code" />
+                <syncfusion:DataGridTextColumn MappingName="Name" HeaderText="Project" />
+                <syncfusion:DataGridTextColumn MappingName="Status" HeaderText="Status" />
+                <syncfusion:DataGridNumericColumn MappingName="Progress" HeaderText="Progress %"
+                                                  Format="#0" />
+                <syncfusion:DataGridNumericColumn MappingName="Budget" HeaderText="Budget"
+                                                  Format="C0" />
+                <syncfusion:DataGridTextColumn MappingName="Manager" HeaderText="Manager" />
+                <syncfusion:DataGridTextColumn MappingName="Location" HeaderText="Location" />
+            </syncfusion:SfDataGrid.Columns>
+        </syncfusion:SfDataGrid>
+
+        <!-- Pagination -->
+        <HorizontalStackLayout Grid.Row="3" Spacing="{StaticResource SpaceMd}" HorizontalOptions="End" VerticalOptions="Center">
+            <Button Style="{StaticResource ButtonSecondary}" Text="&#x2190; Prev"
+                    Command="{Binding PreviousPageCommand}" />
+            <Label VerticalOptions="Center" Style="{StaticResource TextSmall}">
+                <Label.Text>
+                    <MultiBinding StringFormat="Page {0} of {1} ({2} projects)">
+                        <Binding Path="CurrentPage" />
+                        <Binding Path="TotalPages" />
+                        <Binding Path="TotalCount" />
+                    </MultiBinding>
+                </Label.Text>
+            </Label>
+            <Button Style="{StaticResource ButtonSecondary}" Text="Next &#x2192;"
+                    Command="{Binding NextPageCommand}" />
+        </HorizontalStackLayout>
+
+    </Grid>
+</controls:ScreenBase>

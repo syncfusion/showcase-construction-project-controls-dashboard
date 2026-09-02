@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Document preview page — pushed by ProjectDetailPage when a Document Workflow
+     row is tapped. Mirrors the React ProjectDetail document preview Modal:
+     header (title + subtitle = type · Rev · Submitted) + a SfPdfViewer over the
+     sample PDF (the data set has no real per-file content; the dev can replace
+     the sample URL with a real stream later). -->
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Construction.Maui.Controls"
+             xmlns:pdfviewer="clr-namespace:Syncfusion.Maui.PdfViewer;assembly=Syncfusion.Maui.PdfViewer"
+             x:Class="Construction.Maui.Views.DocumentPreviewPage"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+             NavigationPage.HasNavigationBar="False">
+
+    <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+        <!-- Header: back button + document title + subtitle -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Padding="{StaticResource PagePadding}" ColumnSpacing="{StaticResource SpaceMd}">
+            <Button Grid.Column="0" Style="{StaticResource ButtonIcon}" Clicked="OnGoBack"
+                    ImageSource="{x:Static controls:Icon.Back}"
+                    SemanticProperties.Description="Back to project" />
+            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                <Label x:Name="DocTitle" Style="{StaticResource TextH4}" LineBreakMode="TailTruncation" MaxLines="1" />
+                <Label x:Name="DocSubtitle" Style="{StaticResource TextCaption}" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- PDF viewer (loads the sample PDF in code-behind; loaded in code so a
+             failed fetch is non-fatal and we can fall back to a message). -->
+        <Border Grid.Row="1" Style="{StaticResource CardBorder}" Margin="{StaticResource PagePadding}">
+            <Grid>
+                <pdfviewer:SfPdfViewer x:Name="PdfViewer" />
+                <Label x:Name="ErrorLabel" IsVisible="False"
+                       Text="Document preview unavailable."
+                       Style="{StaticResource TextBodyMuted}"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

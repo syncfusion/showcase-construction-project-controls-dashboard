@@ -1,0 +1,62 @@
+[
+    {
+        "month":  "Sep",
+        "planned":  2672051,
+        "actual":  2550826
+    },
+    {
+        "month":  "Oct",
+        "planned":  5322015,
+        "actual":  5046936
+    },
+    {
+        "month":  "Nov",
+        "planned":  7929310,
+        "actual":  7441942
+    },
+    {
+        "month":  "Dec",
+        "planned":  10476262,
+        "actual":  9704851
+    },
+    {
+        "month":  "Jan",
+        "planned":  12949308,
+        "actual":  11824778
+    },
+    {
+        "month":  "Feb",
+        "planned":  15339925,
+        "actual":  13812607
+    },
+    {
+        "month":  "Mar",
+        "planned":  17645204,
+        "actual":  15699333
+    },
+    {
+        "month":  "Apr",
+        "planned":  19868052,
+        "actual":  17531343
+    },
+    {
+        "month":  "May",
+        "planned":  22016996,
+        "actual":  19363353
+    },
+    {
+        "month":  "Jun",
+        "planned":  24105597,
+        "actual":  21250079
+    },
+    {
+        "month":  "Jul",
+        "planned":  26151528,
+        "actual":  23237908
+    },
+    {
+        "month":  "Aug",
+        "planned":  28175373,
+        "actual":  25357835
+    }
+]

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Cost Control screen — mirrors React/Blazor CostControlPage:
+     KPI grid (Total Budget · Committed Spend · Forecast at Completion ·
+     Pending Change Orders · CPI · SPI) + Earned Value Trend (3-line chart) +
+     Variance by Cost Code (bar chart) + Budgets DataGrid. -->
+<controls:ScreenBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:controls="clr-namespace:Construction.Maui.Controls"
+                     xmlns:syncfusion="clr-namespace:Syncfusion.Maui.DataGrid;assembly=Syncfusion.Maui.DataGrid"
+                     xmlns:chart="clr-namespace:Syncfusion.Maui.Charts;assembly=Syncfusion.Maui.Charts"
+                     xmlns:vm="clr-namespace:Construction.Maui.ViewModels"
+             xmlns:models="clr-namespace:Construction.Maui.Models"
+             x:Class="Construction.Maui.Views.CostControlPage"
+             x:DataType="vm:CostControlViewModel"
+             BackgroundColor="{AppThemeBinding Light={StaticResource Gray50}, Dark={StaticResource Gray900}}"
+             NavigationPage.HasNavigationBar="False">
+
+    <ScrollView Padding="{StaticResource PagePadding}">
+        <VerticalStackLayout Spacing="{StaticResource SpaceXl}" MaximumWidthRequest="{StaticResource ContentMaxWidth}">
+
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Cost Control" Style="{StaticResource TextH1}" />
+                <Label Text="Portfolio budget governance, EVM metrics, and variance analysis."
+                       Style="{StaticResource TextBodyMuted}" />
+            </VerticalStackLayout>
+
+            <ActivityIndicator IsVisible="{Binding IsBusy}" IsRunning="{Binding IsBusy}" />
+            <Border IsVisible="{Binding HasError}" Style="{StaticResource CardBorder}"
+                    Stroke="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}">
+                <Label Text="{Binding ErrorMessage}" TextColor="{AppThemeBinding Light={StaticResource Error600}, Dark={StaticResource Error500}}" />
+            </Border>
+
+            <!-- KPI grid — reflows to 2 / 1 columns on tablet/phone widths via
+                 AdaptiveGrids.Reflow in CostControlPage.xaml.cs. -->
+            <Grid x:Name="KpiGrid"
+                  IsVisible="{Binding HasData}" RowDefinitions="*,*" ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource SpaceLg}" RowSpacing="{StaticResource SpaceLg}">
+                <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource KpiBorder}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Total Portfolio Budget" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding TotalBudgetDisplay}" Style="{StaticResource TextKpiValue}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource KpiBorder}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Committed Spend" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding CommittedSpendDisplay}" Style="{StaticResource TextKpiValue}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource KpiBorder}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Forecast at Completion" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding ForecastAtCompletionDisplay}" Style="{StaticResource TextKpiValue}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource KpiBorder}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Pending Change Orders" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding PendingChangeOrdersDisplay}" Style="{StaticResource TextKpiValue}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource KpiBorder}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="CPI (Cost Performance)" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding CpiDisplay}" Style="{StaticResource TextKpiValue}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource KpiBorder}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="SPI (Schedule Performance)" Style="{StaticResource TextCaption}" />
+                        <Label Text="{Binding SpiDisplay}" Style="{StaticResource TextKpiValue}" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Earned value trend -->
+            <Border Style="{StaticResource CardBorder}" IsVisible="{Binding HasData}">
+                <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                    <VerticalStackLayout Grid.Row="0" Spacing="2">
+                        <Label Text="Earned Value Trend" Style="{StaticResource TextH4}" />
+                        <Label Text="BCWS (Planned) · BCWP (Earned) · ACWP (Actual)" Style="{StaticResource TextCaption}" />
+                    </VerticalStackLayout>
+                    <chart:SfCartesianChart Grid.Row="1" HeightRequest="280">
+                        <chart:SfCartesianChart.XAxes>
+                            <chart:CategoryAxis ShowMajorGridLines="False" ShowMinorGridLines="False">
+                                <chart:CategoryAxis.LabelStyle>
+                                    <chart:ChartAxisLabelStyle TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                </chart:CategoryAxis.LabelStyle>
+                                <chart:CategoryAxis.AxisLineStyle>
+                                    <chart:ChartLineStyle Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+                                </chart:CategoryAxis.AxisLineStyle>
+                            </chart:CategoryAxis>
+                        </chart:SfCartesianChart.XAxes>
+                        <chart:SfCartesianChart.YAxes>
+                            <chart:NumericalAxis ShowMajorGridLines="False" ShowMinorGridLines="False" ShowAxisLine="False">
+                                <chart:NumericalAxis.LabelStyle>
+                                    <chart:ChartAxisLabelStyle TextColor="Transparent" />
+                                </chart:NumericalAxis.LabelStyle>
+                            </chart:NumericalAxis>
+                        </chart:SfCartesianChart.YAxes>
+                        <chart:SfCartesianChart.Series>
+                            <chart:LineSeries ItemsSource="{Binding EarnedValueTrend}"
+                                              XBindingPath="Month" YBindingPath="Bcws"
+                                              Fill="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}"
+                                              EnableTooltip="True" />
+                            <chart:LineSeries ItemsSource="{Binding EarnedValueTrend}"
+                                              XBindingPath="Month" YBindingPath="Bcwp"
+                                              Fill="{AppThemeBinding Light={StaticResource Success600}, Dark={StaticResource Success500}}"
+                                              EnableTooltip="True" />
+                            <chart:LineSeries ItemsSource="{Binding EarnedValueTrend}"
+                                              XBindingPath="Month" YBindingPath="Acwp"
+                                              Fill="{AppThemeBinding Light={StaticResource Warning600}, Dark={StaticResource Warning500}}"
+                                              EnableTooltip="True" />
+                        </chart:SfCartesianChart.Series>
+                    </chart:SfCartesianChart>
+                </Grid>
+            </Border>
+
+            <!-- Variance by cost code -->
+            <Border Style="{StaticResource CardBorder}" IsVisible="{Binding HasData}">
+                <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                    <Label Grid.Row="0" Text="Cost Variance by Cost Code" Style="{StaticResource TextH4}" />
+                    <chart:SfCartesianChart Grid.Row="1" HeightRequest="240">
+                        <chart:SfCartesianChart.XAxes>
+                            <chart:CategoryAxis ShowMajorGridLines="False" ShowMinorGridLines="False">
+                                <chart:CategoryAxis.LabelStyle>
+                                    <chart:ChartAxisLabelStyle TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}" />
+                                </chart:CategoryAxis.LabelStyle>
+                                <chart:CategoryAxis.AxisLineStyle>
+                                    <chart:ChartLineStyle Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray700}}" />
+                                </chart:CategoryAxis.AxisLineStyle>
+                            </chart:CategoryAxis>
+                        </chart:SfCartesianChart.XAxes>
+                        <chart:SfCartesianChart.YAxes>
+                            <chart:NumericalAxis ShowMajorGridLines="False" ShowMinorGridLines="False" ShowAxisLine="False">
+                                <chart:NumericalAxis.LabelStyle>
+                                    <chart:ChartAxisLabelStyle TextColor="Transparent" />
+                                </chart:NumericalAxis.LabelStyle>
+                            </chart:NumericalAxis>
+                        </chart:SfCartesianChart.YAxes>
+                        <chart:SfCartesianChart.Series>
+                            <chart:ColumnSeries ItemsSource="{Binding VarianceByCode}"
+                                                XBindingPath="CostCode" YBindingPath="VariancePct"
+                                                Fill="{AppThemeBinding Light={StaticResource Brand600}, Dark={StaticResource Brand500}}"
+                                                CornerRadius="8,8,0,0"
+                                                EnableTooltip="True" />
+                        </chart:SfCartesianChart.Series>
+                    </chart:SfCartesianChart>
+                </Grid>
+            </Border>
+
+            <!-- Budgets grid -->
+            <Border Style="{StaticResource CardBorder}" IsVisible="{Binding HasData}">
+                <Grid RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+                    <Label Grid.Row="0" Text="Budgets" Style="{StaticResource TextH4}" />
+                    <syncfusion:SfDataGrid Grid.Row="1" ItemsSource="{Binding Budgets}" RowHeight="40"
+                                           AutoGenerateColumnsMode="None" SelectionMode="None"
+                                           ColumnWidthMode="Fill"
+                                           HorizontalOptions="Fill"
+                                           VerticalOptions="Fill">
+                        <syncfusion:SfDataGrid.Columns>
+                            <syncfusion:DataGridTextColumn MappingName="Category" HeaderText="Category" />
+                            <syncfusion:DataGridTextColumn MappingName="Description" HeaderText="Description" />
+                            <syncfusion:DataGridNumericColumn MappingName="AllocatedAmount" HeaderText="Allocated" Format="C0" />
+                            <syncfusion:DataGridNumericColumn MappingName="SpentAmount" HeaderText="Spent" Format="C0" />
+                            <syncfusion:DataGridNumericColumn MappingName="Remaining" HeaderText="Remaining" Format="C0" />
+                            <syncfusion:DataGridNumericColumn MappingName="PercentUsed" HeaderText="% Used" Format="#0.0" />
+                        </syncfusion:SfDataGrid.Columns>
+                    </syncfusion:SfDataGrid>
+                </Grid>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</controls:ScreenBase>
