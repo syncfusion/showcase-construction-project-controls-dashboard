@@ -18,7 +18,7 @@
     "@angular/core": "22.0.7",
     "@angular/forms": "22.0.7",
     "@angular/platform-browser": "22.0.7",
-    "@angular/router": "22.0.7",
+    "@angular/router": "22.2.1",
     "@syncfusion/ej2-angular-charts": "^34.1.29",
     "@syncfusion/ej2-angular-diagrams": "^34.1.29",
     "@syncfusion/ej2-angular-grids": "^34.1.29",
